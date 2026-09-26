@@ -6,7 +6,7 @@ import { delimiter, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { after, test } from 'node:test';
 import { readStlVertices } from '../scripts/export-lid-stls.mjs';
-import { inspectMesh } from './helpers/mesh.mjs';
+import { inspectMesh } from '../../../tests/helpers/mesh.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const executable = (process.env.OPENSCAD || 'openscad').replace(/openscad\.com$/i, 'openscad.exe');

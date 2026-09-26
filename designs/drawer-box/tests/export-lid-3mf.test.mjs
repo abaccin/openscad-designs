@@ -72,7 +72,7 @@ test('3MF export reuses renderer settings and publishes just one project', t => 
   assert.ok(f.log.some(message => message.includes('already assigned')));
 });
 
-test('3MF default is a repository-relative file, not a directory of STLs', t => {
+test('3MF default is a design-relative file, not a directory of STLs', t => {
   const f = fixture(t);
   assert.equal(exportLid3mf({}, f.dependencies), join(f.temporary, 'exports', 'drawer-box.3mf'));
   assert.deepEqual(readdirSync(join(f.temporary, 'exports')), ['drawer-box.3mf']);

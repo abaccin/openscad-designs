@@ -20,7 +20,9 @@ const help = `Export aligned lid-component STLs using saved round_box_drawer.sca
 
 Usage: node scripts\\export-lid-stls.mjs [--output-dir DIRECTORY] [-D NAME=VALUE ...]
 
-  --output-dir DIRECTORY  New or empty directory (default: exports\\lid-stls).
+Run from designs\\drawer-box, or invoke the script by its full path.
+
+  --output-dir DIRECTORY  New or empty directory (default: exports\\lid-stls under this design).
   -D NAME=VALUE            OpenSCAD definition; repeat for multiple settings.
   --help                  Show this help.
 

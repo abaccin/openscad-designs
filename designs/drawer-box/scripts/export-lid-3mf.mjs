@@ -12,7 +12,9 @@ const help = `Create one Bambu Studio 3MF containing the box and decorated lid o
 
 Usage: node scripts\\export-3mf.mjs [--output FILE.3mf] [--force] [-D NAME=VALUE ...]
 
-  --output FILE.3mf  Destination (default: exports\\drawer-box.3mf under the repository).
+Run from designs\\drawer-box, or invoke the script by its full path.
+
+  --output FILE.3mf  Destination (default: exports\\drawer-box.3mf under this design).
   --force            Replace an existing 3MF after the new export succeeds.
   -D NAME=VALUE      Override a saved OpenSCAD setting; repeat as needed.
   --help             Show this help.

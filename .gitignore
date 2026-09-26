@@ -1,3 +1,2 @@
-/exports/lid-stls/
-/exports/lid.3mf
-/exports/drawer-box.3mf
+# Generated meshes and slicer projects belong in an exports directory.
+exports/

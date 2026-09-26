@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { delimiter, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { after, test } from 'node:test';
-import { inspectMesh } from './helpers/mesh.mjs';
+import { inspectMesh } from '../../../tests/helpers/mesh.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const configured = process.env.OPENSCAD || 'openscad';

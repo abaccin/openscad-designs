@@ -8,7 +8,7 @@ import { test } from 'node:test';
 import { inspectMesh } from '../../../tests/helpers/mesh.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const source = join(root, 'lampadario.scad');
+const source = join(root, 'chandelier.scad');
 const configured = process.env.OPENSCAD || 'openscad';
 const executable = process.platform === 'win32'
   ? configured.replace(/openscad\.com$/i, 'openscad.exe') : configured;
@@ -22,9 +22,9 @@ const defaults = {
 };
 
 function render(t, overrides = {}, errorPattern) {
-  const temporary = mkdtempSync(join(tmpdir(), 'lampadario-test-'));
+  const temporary = mkdtempSync(join(tmpdir(), 'chandelier-test-'));
   t.after(() => rmSync(temporary, { recursive: true, force: true }));
-  const output = join(temporary, 'lampadario.stl');
+  const output = join(temporary, 'chandelier.stl');
   const before = readFileSync(source);
   const result = spawnSync(executable, [
     '-o', output, '--export-format', 'asciistl',
@@ -174,23 +174,23 @@ function checkPrintLayout(vertices, settings = defaults) {
       Math.max(settings.base_height, settings.dome_height, settings.ring_height)]], 0.05);
 }
 
-test('lampadario default: three separate watertight bed-level parts with preserved features', t => {
+test('chandelier default: three separate watertight bed-level parts with preserved features', t => {
   checkPrintLayout(render(t));
 });
 
-test('lampadario base: measured dimensions and stepped through-bore', t => {
+test('chandelier base: measured dimensions and stepped through-bore', t => {
   const mesh = inspectMesh(render(t, { part: 'base' }));
   checkBounds(mesh, [[-31.75, -31.75, 0], [31.75, 31.75, 30]]);
   checkBase(mesh);
 });
 
-test('lampadario ring: measured dimensions, thin wall, and independent bed-level export', t => {
+test('chandelier ring: measured dimensions, thin wall, and independent bed-level export', t => {
   const mesh = inspectMesh(render(t, { part: 'ring', layout: 'source' }));
   checkBounds(mesh, [[-17.1, -17.1, 0], [17.1, 17.1, 1.8]]);
   checkRing(mesh);
 });
 
-test('lampadario dome: finished height, openings, cavity, and source cross-section fidelity', t => {
+test('chandelier dome: finished height, openings, cavity, and source cross-section fidelity', t => {
   const mesh = inspectMesh(render(t, { part: 'dome' }));
   checkBounds(mesh, [[-30, -30, 0], [30, 30, 41.2374]], 0.05);
   checkDome(mesh);
@@ -227,7 +227,7 @@ test('lampadario dome: finished height, openings, cavity, and source cross-secti
   }
 });
 
-test('lampadario source layout: original positions and separate raised ring', t => {
+test('chandelier source layout: original positions and separate raised ring', t => {
   const vertices = render(t, { layout: 'source' });
   const mesh = inspectMesh(vertices, 3);
   checkBounds(mesh, [[-93, -75.9995, 0], [20.5, 28, 41.2374]], 0.05);
@@ -252,7 +252,7 @@ test('lampadario source layout: original positions and separate raised ring', t 
     `Preserve the measured 0.002 mm radial ring clearance, got ${clearance}`);
 });
 
-test('lampadario resized: dimensions, profile, and adaptive print spacing', t => {
+test('chandelier resized: dimensions, profile, and adaptive print spacing', t => {
   const settings = {
     flange_diameter: 76.2, flange_height: 5, collar_diameter: 50, base_height: 34,
     lower_bore_diameter: 42.2, lower_bore_height: 3.4, upper_bore_diameter: 44.2,
@@ -264,7 +264,7 @@ test('lampadario resized: dimensions, profile, and adaptive print spacing', t =>
   checkPrintLayout(render(t, settings), settings);
 });
 
-test('lampadario top-hole resizing preserves finished height and ignores unselected dimensions', t => {
+test('chandelier top-hole resizing preserves finished height and ignores unselected dimensions', t => {
   const settings = { ...defaults, top_hole_diameter: 12 };
   const mesh = inspectMesh(render(t, {
     part: 'dome', top_hole_diameter: 12, ring_height: -1, base_height: 0,
@@ -275,7 +275,7 @@ test('lampadario top-hole resizing preserves finished height and ignores unselec
     'Measured top-hole radius after resizing');
 });
 
-test('lampadario equal opening/interior diameters produce a valid dome without a ledge', t => {
+test('chandelier equal opening/interior diameters produce a valid dome without a ledge', t => {
   const mesh = inspectMesh(render(t, { part: 'dome', dome_opening_diameter: 55.006 }));
   checkBounds(mesh, [[-30, -30, 0], [30, 30, 41.2374]], 0.05);
   assert.equal(mesh.contains([27.4, 0, 1]), false);
@@ -302,5 +302,5 @@ for (const [name, overrides, message] of [
     part: 'dome', dome_inner_diameter: 59.8, dome_inner_height: 39,
   }, /Dome wall must remain positive/],
 ]) {
-  test(`lampadario rejects ${name}`, t => render(t, overrides, message));
+  test(`chandelier rejects ${name}`, t => render(t, overrides, message));
 }

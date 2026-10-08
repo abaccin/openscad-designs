@@ -1,8 +1,8 @@
-# Lampadario
+# Chandelier
 
 [All designs](../../README.md)
 
-A standalone parametric reconstruction of `Lampadario (9).stl`: a flanged
+A standalone parametric reconstruction of the supplied chandelier STL: a flanged
 base with a stepped through-bore, a thin ring, and a hollow ellipsoidal dome
 with a central top opening. All three disconnected bodies from the reference
 are retained. The script does **not** import or require the original STL.
@@ -72,17 +72,17 @@ It is not a manufacturing clearance and does not change bore diameters.
 
 ## Preview and export
 
-Open `designs\lampadario\lampadario.scad` in OpenSCAD 2021.01 or later.
+Open `designs\chandelier\chandelier.scad` in OpenSCAD 2021.01 or later.
 Preview with **F5**, adjust the dimensions, then render with **F6** before
 exporting STL. No external libraries, fonts, or assets are needed.
 
 From the repository root in PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force designs\lampadario\exports | Out-Null
+New-Item -ItemType Directory -Force designs\chandelier\exports | Out-Null
 & 'C:\Program Files\OpenSCAD\openscad.com' `
-  -o designs\lampadario\exports\lampadario.stl `
-  designs\lampadario\lampadario.scad
+  -o designs\chandelier\exports\chandelier.stl `
+  designs\chandelier\chandelier.scad
 ```
 
 Use `openscad.com` for synchronous Windows console commands, or `openscad`
@@ -94,8 +94,8 @@ For example:
 ```powershell
 & 'C:\Program Files\OpenSCAD\openscad.com' `
   -D 'part="dome"' -D 'top_hole_diameter=12' `
-  -o designs\lampadario\exports\dome.stl `
-  designs\lampadario\lampadario.scad
+  -o designs\chandelier\exports\dome.stl `
+  designs\chandelier\chandelier.scad
 ```
 
 Generated files under `exports` are ignored by Git.
@@ -127,7 +127,7 @@ From the repository root, with Node.js 18+ and OpenSCAD installed:
 
 ```powershell
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
-node --test designs\lampadario\tests\model.test.mjs
+node --test designs\chandelier\tests\model.test.mjs
 ```
 
 Checks cover separate watertight bodies, measured bounds, the stepped base

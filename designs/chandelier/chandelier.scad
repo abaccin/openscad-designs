@@ -1,4 +1,4 @@
-// Parametric reconstruction of Lampadario (9).stl. Dimensions are millimeters.
+// Parametric chandelier reconstruction. Dimensions are millimeters.
 // Preview with F5, then render with F6 before exporting.
 
 /* [Output] */

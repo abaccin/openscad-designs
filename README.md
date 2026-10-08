@@ -2,8 +2,9 @@
 
 A collection of parametric OpenSCAD designs for 3D printing. Each design has
 its own folder, source, assets, and usage guide. Dimensions are in millimeters;
-OpenSCAD 2021.01 or later is required. The drawer box and pipe clamp need no
-external libraries; the chandelier uses [BOSL2](https://github.com/BelfrySCAD/BOSL2).
+OpenSCAD 2021.01 or later is required. The chandelier's
+[BOSL2](https://github.com/BelfrySCAD/BOSL2) dependencies are bundled under
+`include\BOSL2`; no external library installation or `OPENSCADPATH` setup is needed.
 
 ## Designs
 
@@ -27,6 +28,13 @@ designs\
     ab-logo-monochrome.svg
     robot-relief.svg
     scripts\
+    include\
+      README.md
+      BOSL2\
+        LICENSE
+        std.scad
+        threading.scad
+        ... other required includes
     tests\
   pipe-clamp\
     README.md
@@ -42,8 +50,10 @@ tests\
 ```
 
 Design-specific scripts and tests live with their design. Reusable mesh
-checks live in the root `tests\helpers` directory. Generated files belong in
-an `exports` directory within the relevant design; `exports` directories
+checks live in the root `tests\helpers` directory. Shared third-party includes
+live under `include`; see [their provenance and license](include/README.md).
+Generated files belong in an `exports` directory within the relevant design;
+`exports` directories
 are ignored by Git.
 
 **Migrating from the drawer-box-only layout:** the original model, SVGs,
@@ -67,7 +77,6 @@ From the repository root, run an individual design's checks or the full collecti
 ```powershell
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
 node --test designs\pipe-clamp\tests\model.test.mjs
-$env:OPENSCADPATH='C:\src' # Parent of the BOSL2 folder; see the chandelier guide.
 node --test designs\chandelier\tests\model.test.mjs
 node --test
 ```
@@ -93,5 +102,7 @@ Do not push changes directly to `main` or bypass branch protection.
 
 ## Licensing
 
-A license has not yet been specified for the source or artwork. Public
-availability alone does not grant a license to reuse or redistribute them.
+A license has not yet been specified for the project-authored source or
+artwork. Public availability alone does not grant a license to reuse or
+redistribute them. The bundled BOSL2 files are separately licensed under
+[BSD-2-Clause](include/BOSL2/LICENSE).

@@ -2,7 +2,8 @@
 
 A collection of parametric OpenSCAD designs for 3D printing. Each design has
 its own folder, source, assets, and usage guide. Dimensions are in millimeters;
-OpenSCAD 2021.01 or later is required. No external OpenSCAD libraries are needed.
+OpenSCAD 2021.01 or later is required. The drawer box and pipe clamp need no
+external libraries; the chandelier uses [BOSL2](https://github.com/BelfrySCAD/BOSL2).
 
 ## Designs
 
@@ -10,7 +11,7 @@ OpenSCAD 2021.01 or later is required. No external OpenSCAD libraries are needed
 | --- | --- | --- |
 | [Drawer box](designs/drawer-box/README.md) | [round_box_drawer.scad](designs/drawer-box/round_box_drawer.scad) | Rounded organizer with dividers, stacking, sliding or magnetic lids, and optional multi-color decoration. |
 | [Pipe clamp](designs/pipe-clamp/README.md) | [pipe_clamp.scad](designs/pipe-clamp/pipe_clamp.scad) | Split circular clamp with tightening tabs and a transverse screw hole; defaults to a 20 mm pipe bore. |
-| [Chandelier](designs/chandelier/README.md) | [chandelier.scad](designs/chandelier/chandelier.scad) | Reconstructed flanged base, thin ring, and hollow ellipsoidal dome with editable dimensions and separated print output. |
+| [Chandelier](designs/chandelier/README.md) | [chandelier.scad](designs/chandelier/chandelier.scad) | Flanged base and ellipsoidal dome joined by coarse, clearance-adjustable BOSL2 threads, with print and assembled layouts. |
 
 Open a design's `.scad` file, adjust its settings, preview with **F5**, then
 render with **F6** before exporting. Keep any referenced assets beside the
@@ -66,6 +67,7 @@ From the repository root, run an individual design's checks or the full collecti
 ```powershell
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
 node --test designs\pipe-clamp\tests\model.test.mjs
+$env:OPENSCADPATH='C:\src' # Parent of the BOSL2 folder; see the chandelier guide.
 node --test designs\chandelier\tests\model.test.mjs
 node --test
 ```

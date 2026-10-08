@@ -1,8 +1,8 @@
 // Parametric chandelier reconstruction. Dimensions are millimeters.
 // Preview with F5, then render with F6 before exporting.
 
-include <BOSL2/std.scad>
-include <BOSL2/threading.scad>
+include <../../include/BOSL2/std.scad>
+include <../../include/BOSL2/threading.scad>
 
 /* [Output] */
 part = "all"; // [all, base, dome]

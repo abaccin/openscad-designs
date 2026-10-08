@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { inspectMesh } from '../../../tests/helpers/mesh.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const source = join(root, 'chandelier.scad');
+const library = resolve(root, '..', '..', 'include', 'BOSL2');
 const configured = process.env.OPENSCAD || 'openscad';
 const executable = process.platform === 'win32'
   ? configured.replace(/openscad\.com$/i, 'openscad.exe') : configured;
@@ -45,7 +46,10 @@ function render(t, overrides = {}, { errorPattern, program, empty = false } = {}
       '-D', `${key}=${JSON.stringify(value)}`,
     ]),
     entry,
-  ], { cwd: temporary, encoding: 'utf8', timeout: 180_000 });
+  ], {
+    cwd: temporary, encoding: 'utf8', timeout: 180_000,
+    env: { ...process.env, OPENSCADPATH: temporary },
+  });
   assert.ifError(result.error);
   const diagnostics = result.stdout + result.stderr;
   assert.deepEqual(readFileSync(source), before, 'Rendering must not change saved settings');
@@ -254,6 +258,24 @@ function collisionProgram(settings, angles, followHelix) {
         }
     }`;
 }
+
+test('chandelier bundles every transitive BOSL2 include and its license', () => {
+  const pending = [join(library, 'std.scad'), join(library, 'threading.scad')];
+  const visited = new Set();
+  while (pending.length) {
+    const file = pending.pop();
+    if (visited.has(file)) continue;
+    visited.add(file);
+    assert.ok(file.startsWith(`${library}${sep}`), `Dependency must stay inside the bundle: ${file}`);
+    assert.ok(existsSync(file), `Bundled dependency must exist: ${file}`);
+    for (const match of readFileSync(file, 'utf8').matchAll(
+      /^\s*(?:include|use)\s*<([^>]+)>/gm,
+    )) {
+      pending.push(resolve(dirname(file), match[1]));
+    }
+  }
+  assert.match(readFileSync(join(library, 'LICENSE'), 'utf8'), /BSD 2-Clause License/);
+});
 
 test('chandelier default: two watertight printable parts with matched coarse threads', t => {
   checkPrintLayout(render(t));

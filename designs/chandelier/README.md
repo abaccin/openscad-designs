@@ -6,7 +6,8 @@ A parametric adaptation of the supplied chandelier STL: a flanged base with a
 stepped through-bore and a hollow ellipsoidal dome with a central top opening.
 The cylinder screws into an integrated female-threaded socket inside the dome.
 The reference's separate thin ring is removed. The script does **not** import
-or require the original STL, but it now requires **BOSL2** for the threads.
+or require the original STL. Its **BOSL2** thread library is bundled with the
+repository.
 
 Dimensions are interpreted as millimeters because STL does not encode units.
 Measured defaults preserve the reference's exterior dimensions, while smoother
@@ -16,23 +17,19 @@ The dome is elliptical, not spherical, and its wall thickness varies. Its
 lower cavity is intentionally reshaped into a threaded socket; it no longer
 reproduces the original oversized bottom opening.
 
-## BOSL2 setup
+## Bundled BOSL2
 
-Install [BOSL2](https://github.com/BelfrySCAD/BOSL2) in OpenSCAD's user library
-directory, or point `OPENSCADPATH` to its **parent** directory. For the local
-checkout at `C:\src\BOSL2`:
+[BOSL2](https://github.com/BelfrySCAD/BOSL2) is included under the repository's
+root `include\BOSL2` folder. The source references its `std.scad` and
+`threading.scad` using paths relative to `chandelier.scad`. All their
+transitive includes are bundled, so neither a separate BOSL2 installation nor
+an `OPENSCADPATH` setting is needed, in the GUI or on the command line.
+Keep the repository's folder structure intact when moving the design.
 
-```powershell
-$env:OPENSCADPATH='C:\src'
-```
-
-The source uses `include <BOSL2/std.scad>` and
-`include <BOSL2/threading.scad>`, not an absolute machine-specific path.
-Keep any other library search directories in your `OPENSCADPATH` list.
-For the GUI, launch OpenSCAD from the configured environment or use its normal
-user library folder. This design was checked with BOSL2 revision `d6d18450`
-and OpenSCAD 2021.01; it uses the current `trapezoidal_threaded_rod()` API,
-including blunt starts and numeric end bevels.
+The bundled files are unmodified from revision `d6d18450` and retain the
+upstream BSD-2-Clause license. See [include documentation](../../include/README.md)
+for provenance. This design was checked with OpenSCAD 2021.01; it uses
+`trapezoidal_threaded_rod()`, including blunt starts and numeric end bevels.
 
 ## Output and resolution
 
@@ -113,8 +110,8 @@ and female socket must retain `minimum_wall`, the depth must be less than
 half the pitch, and the cylinder must have room for two pitches plus chamfers.
 For the dome, keep `hole < interior < outside` diameters; the socket must
 reach `dome_inner_offset`, and its tip clearance must end below the upper
-cavity's top. Shared connection settings are
-checked for either individual part so both exports remain compatible.
+cavity's top. Shared connection settings are checked for either individual
+part so both exports remain compatible.
 
 The hidden `epsilon=0.01` extends cuts beyond coincident faces.
 It is not a manufacturing clearance and does not change bore diameters.
@@ -123,14 +120,13 @@ It is not a manufacturing clearance and does not change bore diameters.
 
 Open `designs\chandelier\chandelier.scad` in OpenSCAD 2021.01 or later.
 Preview with **F5**, adjust the dimensions, then render with **F6** before
-exporting STL. BOSL2 must be available on the library search path; no fonts
-or original STL assets are needed.
+exporting STL. The bundled `include` folder must remain at the repository
+root; no fonts or original STL assets are needed.
 
 From the repository root in PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force designs\chandelier\exports | Out-Null
-$env:OPENSCADPATH='C:\src'
 & 'C:\Program Files\OpenSCAD\openscad.com' `
   -o designs\chandelier\exports\chandelier.stl `
   designs\chandelier\chandelier.scad
@@ -190,17 +186,19 @@ From the repository root, with Node.js 18+ and OpenSCAD installed:
 
 ```powershell
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
-$env:OPENSCADPATH='C:\src'
 node --test designs\chandelier\tests\model.test.mjs
 ```
 
-Checks cover two watertight print bodies, exterior bounds, the stepped base
-bore, helical pitch/depth, measured male/female radial clearance, the dome's
+Checks cover bundled include completeness, two watertight print bodies,
+exterior bounds, the stepped base bore, helical pitch/depth, measured
+male/female radial clearance, the dome's
 upper cavity and opening, print/source/assembled layouts, resizing, and
 explicit invalid-input failures. Solid-intersection checks exercise seated
 and partially unscrewed positions, while a deliberately misphased connection
 must interfere. The flange's intended planar seat contact is excluded from
 thread interference checks.
+Every render uses an isolated library search path to verify that the bundled
+includes work without an external BOSL2 checkout.
 Representative original outer cross-section samples must lie within
 **0.15 mm** of the reconstructed radial surface.
 Cylindrical bounds use a 0.02 mm tolerance, and the dome's finished height

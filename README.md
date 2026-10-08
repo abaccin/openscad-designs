@@ -10,6 +10,7 @@ OpenSCAD 2021.01 or later is required. No external OpenSCAD libraries are needed
 | --- | --- | --- |
 | [Drawer box](designs/drawer-box/README.md) | [round_box_drawer.scad](designs/drawer-box/round_box_drawer.scad) | Rounded organizer with dividers, stacking, sliding or magnetic lids, and optional multi-color decoration. |
 | [Pipe clamp](designs/pipe-clamp/README.md) | [pipe_clamp.scad](designs/pipe-clamp/pipe_clamp.scad) | Split circular clamp with tightening tabs and a transverse screw hole; defaults to a 20 mm pipe bore. |
+| [Lampadario](designs/lampadario/README.md) | [lampadario.scad](designs/lampadario/lampadario.scad) | Reconstructed flanged base, thin ring, and hollow ellipsoidal dome with editable dimensions and separated print output. |
 
 Open a design's `.scad` file, adjust its settings, preview with **F5**, then
 render with **F6** before exporting. Keep any referenced assets beside the
@@ -29,6 +30,10 @@ designs\
   pipe-clamp\
     README.md
     pipe_clamp.scad
+    tests\
+  lampadario\
+    README.md
+    lampadario.scad
     tests\
 tests\
   helpers\
@@ -56,11 +61,12 @@ These exporters remain specific to the drawer box, not to every design.
 ## Checks
 
 Tests require Node.js 18+ and OpenSCAD 2021.01+; no npm install is needed.
-From the repository root, run the pipe-clamp checks or the full collection:
+From the repository root, run an individual design's checks or the full collection:
 
 ```powershell
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
 node --test designs\pipe-clamp\tests\model.test.mjs
+node --test designs\lampadario\tests\model.test.mjs
 node --test
 ```
 

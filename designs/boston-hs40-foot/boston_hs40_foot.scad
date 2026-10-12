@@ -1,5 +1,7 @@
 // Boston HS 40 speaker foot. All dimensions are millimeters.
 
+include <../../include/BOSL2/std.scad>
+
 /* [Outline] */
 overall_length = 118.4;
 body_width = 30;
@@ -11,6 +13,10 @@ flare_start_from_top = 90;
 bottom_rise = 3;
 // Unmeasured contour choice; adjust to match the original toes.
 toe_radius = 5;
+
+/* [Outer edge chamfer] */
+// Equal perimeter setback and depth on both faces; zero keeps sharp edges.
+edge_chamfer = 0.5;
 
 /* [Side-profile bend] */
 // Distance down from the rounded top tip to the start of the bend.
@@ -99,6 +105,13 @@ assert(bend_tip_offset == 0 || max(
     recess_start_from_top + recess_length
 ) < bend_start_from_top,
     "Mounting holes and recess must stay above the bend; set bend_tip_offset=0 for a flat profile.");
+assert(edge_chamfer >= 0 && edge_chamfer < plate_thickness / 2
+    && edge_chamfer < toe_radius,
+    "Edge chamfer must be nonnegative and smaller than half the thickness and the toe radius.");
+assert(large_hole_diameter + 2 * edge_chamfer < body_width
+    && recess_width + 2 * edge_chamfer < body_width
+    && recess_start_from_top > edge_chamfer,
+    "Chamfer must leave full-width rims around the mounting holes and recess.");
 
 function cubic_bezier(points, t) =
     (1 - t)^3 * points[0]
@@ -136,28 +149,28 @@ function outline_points() = concat(
 );
 
 // Concentric circular faces preserve thickness normal to the curved profile.
-function profile_z(y, front) = bend_tip_offset == 0 || y >= bend_y
-    ? (front ? plate_thickness : 0)
+function profile_z(y, depth) = bend_tip_offset == 0 || y >= bend_y
+    ? depth
     : plate_thickness / 2 + bend_direction * (bend_radius - sqrt(
-        (bend_radius - bend_direction * (front ? plate_thickness / 2
-            : -plate_thickness / 2))^2 - (bend_y - y)^2
+        (bend_radius - bend_direction * (depth - plate_thickness / 2))^2
+            - (bend_y - y)^2
     ));
 
 function side_profile_points() = concat(
     [for (i = [0 : bend_steps])
-        let(y = bend_y * i / bend_steps) [y, profile_z(y, false)]],
+        let(y = bend_y * i / bend_steps) [y, profile_z(y, 0)]],
     [[overall_length, 0], [overall_length, plate_thickness]],
     [for (i = [bend_steps : -1 : 0])
-        let(y = bend_y * i / bend_steps) [y, profile_z(y, true)]]
+        let(y = bend_y * i / bend_steps) [y, profile_z(y, plate_thickness)]]
 );
 
-module plate_body() {
+module sharp_plate_body() {
     if (bend_tip_offset == 0) {
         linear_extrude(height = plate_thickness)
             polygon(outline_points());
     } else {
-        min_z = min(0, profile_z(0, false));
-        max_z = max(plate_thickness, profile_z(0, true));
+        min_z = min(0, profile_z(0, 0));
+        max_z = max(plate_thickness, profile_z(0, plate_thickness));
         intersection() {
             translate([0, 0, min_z - epsilon])
                 linear_extrude(height = max_z - min_z + 2 * epsilon)
@@ -167,6 +180,27 @@ module plate_body() {
                 linear_extrude(height = base_width + 2 * epsilon, center = true)
                     polygon(side_profile_points());
         }
+    }
+}
+
+module plate_body() {
+    if (edge_chamfer == 0) {
+        sharp_plate_body();
+    } else {
+        beveled = offset_sweep(
+            outline_points(), height = plate_thickness, cp = [0, 0, 0],
+            ends = os_chamfer(width = edge_chamfer, height = edge_chamfer),
+            offset = "delta"
+        );
+        // Refine broad faces before applying the nonlinear bend.
+        refined = bend_tip_offset == 0 ? beveled
+            : vnf_slice(beveled, "Y",
+                [for (i = [1 : bend_steps]) bend_y * i / bend_steps]);
+        triangles = vnf_triangulate(refined);
+        polyhedron(
+            points = [for (p = triangles[0]) [p.x, p.y, profile_z(p.y, p.z)]],
+            faces = triangles[1], convexity = 10
+        );
     }
 }
 

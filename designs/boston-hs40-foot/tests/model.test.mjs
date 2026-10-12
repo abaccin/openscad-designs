@@ -15,6 +15,7 @@ const executable = process.platform === 'win32'
 const defaults = {
   overall_length: 118.4, body_width: 30, base_width: 40, plate_thickness: 5,
   flare_start_from_top: 90, bottom_rise: 3, toe_radius: 5,
+  edge_chamfer: 0.5,
   bend_start_from_top: 87, bend_tip_offset: 3,
   large_hole_diameter: 12, large_hole_from_top: 56,
   recess_width: 12.5, recess_length: 28, recess_depth: 3,
@@ -37,27 +38,32 @@ function render(t, overrides) {
 }
 
 for (const [name, overrides, expectedBounds] of [
-  ['measured defaults', {}, [[-20, 0, 0], [20, 118.4, 8.046786]]],
+  ['measured defaults', {}, [[-20, 0, 0], [20, 118.4, 7.949642]]],
   ['resized foot', {
     overall_length: 130, body_width: 34, base_width: 46, plate_thickness: 6,
     flare_start_from_top: 94, bottom_rise: 4, toe_radius: 6,
+    edge_chamfer: 0.75,
     bend_start_from_top: 93, bend_tip_offset: 4,
     large_hole_diameter: 14, large_hole_from_top: 55,
     recess_width: 14, recess_length: 32, recess_depth: 3.5,
     recess_start_from_top: 10, small_hole_diameter: 7,
     curve_steps: 64, bend_steps: 64, $fn: 128,
-  }, [[-23, 0, 0], [23, 130, 10.072250]]],
+  }, [[-23, 0, 0], [23, 130, 9.906911]]],
   ['reversed bend', {
     bend_tip_offset: -3,
-  }, [[-20, 0, -3.046786], [20, 118.4, 5]]],
+  }, [[-20, 0, -2.949642], [20, 118.4, 5]]],
   ['flat profile and flat bottom', {
     recess_start_from_top: 20, bottom_rise: 0, toe_radius: 7, bend_tip_offset: 0,
+    edge_chamfer: 1,
   }, [[-20, 0, 0], [20, 118.4, 5]]],
   ['flat profile with lower recess', {
     bend_tip_offset: 0, bend_start_from_top: 0, recess_start_from_top: 73,
   }, [[-20, 0, 0], [20, 118.4, 5]]],
+  ['sharp-edge compatibility', {
+    edge_chamfer: 0,
+  }, [[-20, 0, 0], [20, 118.4, 8.046786]]],
 ]) {
-  test(`Boston HS 40 foot ${name}: outline, bend, through-holes, and capsule recess`, t => {
+  test(`Boston HS 40 foot ${name}: outline, chamfer, bend, holes, and recess`, t => {
     const { result, output } = render(t, overrides);
     assert.equal(result.status, 0, result.stdout + result.stderr);
     assert.doesNotMatch(result.stdout + result.stderr, /ERROR:|WARNING:|not a valid 2-manifold/i);
@@ -80,8 +86,11 @@ for (const [name, overrides, expectedBounds] of [
     const bendDirection = Math.sign(s.bend_tip_offset);
     const bendRadius = s.bend_tip_offset === 0 ? Infinity
       : (bendY ** 2 + s.bend_tip_offset ** 2) / (2 * Math.abs(s.bend_tip_offset));
-    const midplaneZ = y => s.bend_tip_offset === 0 || y >= bendY ? midZ
-      : midZ + bendDirection * (bendRadius - Math.sqrt(bendRadius ** 2 - (bendY - y) ** 2));
+    const profileZ = (y, depth) => s.bend_tip_offset === 0 || y >= bendY ? depth
+      : midZ + bendDirection * (bendRadius - Math.sqrt(
+        (bendRadius - bendDirection * (depth - midZ)) ** 2 - (bendY - y) ** 2,
+      ));
+    const midplaneZ = y => profileZ(y, midZ);
     const floorZ = s.plate_thickness - s.recess_depth;
     const recessRadius = s.recess_width / 2;
     const upperY = s.overall_length - s.recess_start_from_top - recessRadius;
@@ -105,6 +114,7 @@ for (const [name, overrides, expectedBounds] of [
       assert.equal(floorZ, 2);
       assert.equal(s.bend_start_from_top, 87);
       assert.equal(s.bend_tip_offset, 3);
+      assert.equal(s.edge_chamfer, 0.5);
     }
 
     for (const angle of [0, 45, 90, 135, 180]) {
@@ -151,6 +161,39 @@ for (const [name, overrides, expectedBounds] of [
       expectPoint([topRadius - 1, solidY, z], false, 'Straight section front and back faces');
     }
 
+    if (s.edge_chamfer > 0) {
+      const bevelTolerance = 0.02;
+      for (const [y, halfWidth] of [[solidY, topRadius], [s.toe_radius, s.base_width / 2]]) {
+        for (const fraction of [0.25, 0.5, 0.75]) {
+          const depth = s.edge_chamfer * fraction;
+          const setback = s.edge_chamfer - depth;
+          for (const z of [depth, s.plate_thickness - depth]) {
+            for (const side of [-1, 1]) {
+              for (const [delta, inside] of [[-bevelTolerance, true], [bevelTolerance, false]]) {
+                expectPoint([side * (halfWidth - setback + delta), y, profileZ(y, z)],
+                  inside, 'Equal chamfer setback and depth on both straight and bent edges');
+              }
+            }
+          }
+        }
+      }
+      const depth = s.edge_chamfer / 2;
+      for (const angle of [45, 90, 135]) {
+        const radians = angle * Math.PI / 180;
+        for (const z of [depth, s.plate_thickness - depth]) {
+          for (const [delta, inside] of [[-bevelTolerance, true], [bevelTolerance, false]]) {
+            const radius = topRadius - s.edge_chamfer + depth + delta;
+            expectPoint([radius * Math.cos(radians), topY + radius * Math.sin(radians), z],
+              inside, 'Chamfer follows the semicircular top perimeter');
+          }
+        }
+      }
+    } else {
+      for (const z of [margin, s.plate_thickness - margin]) {
+        expectPoint([topRadius - margin, solidY, z], true, 'Zero chamfer retains sharp corners');
+      }
+    }
+
     if (s.bend_tip_offset !== 0) {
       const thicknessTolerance = 0.01;
       for (const z of [0, s.plate_thickness]) {
@@ -172,12 +215,11 @@ for (const [name, overrides, expectedBounds] of [
           }
         }
       }
-      for (const front of [false, true]) {
-        const radius = bendRadius - bendDirection * (front ? midZ : -midZ);
-        const z = midZ + bendDirection * (bendRadius - Math.sqrt(radius ** 2 - bendY ** 2));
+      for (const depth of [s.edge_chamfer, s.plate_thickness - s.edge_chamfer]) {
+        const z = profileZ(0, depth);
         assert.ok(vertices.some(vertex =>
           Math.abs(vertex[1]) < 0.001 && Math.abs(vertex[2] - z) < 0.001),
-        'Bottom tip must reach the specified circular profile on both faces');
+        'Bottom tip must retain the full outline between the two chamfers');
       }
     }
 
@@ -247,6 +289,12 @@ for (const [name, overrides, message] of [
   ['bend cannot preserve thickness', { bend_tip_offset: 25 }, /too tight to preserve/],
   ['large hole enters bend', { large_hole_from_top: 86 }, /must stay above the bend/],
   ['recess enters bend', { recess_start_from_top: 73 }, /must stay above the bend/],
+  ['negative chamfer', { edge_chamfer: -0.1 }, /Edge chamfer must be nonnegative/],
+  ['chamfers consume thickness', { edge_chamfer: 2.5 }, /smaller than half the thickness/],
+  ['chamfer consumes toes', { toe_radius: 0.4, bottom_rise: 0.2 }, /the toe radius/],
+  ['chamfer touches large-hole rim', { large_hole_diameter: 29.5 }, /full-width rims/],
+  ['chamfer touches recess rim', { recess_width: 29.5, recess_length: 40 }, /full-width rims/],
+  ['chamfer touches recess top', { recess_start_from_top: 0.25 }, /full-width rims/],
 ]) {
   test(`Boston HS 40 foot rejects ${name}`, t => {
     const { result } = render(t, overrides);

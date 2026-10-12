@@ -6,7 +6,9 @@ A parametric replacement foot based on a measured Boston HS 40 speaker foot
 and its hand-drawn outline. The default plate is **118.4 mm long, 5 mm thick**,
 with a **30 mm-wide body**, a semicircular top, and a **40 mm-wide flared bottom**.
 Its side profile bends out of plane starting **87 mm down from the rounded top**.
-No external OpenSCAD libraries or assets are required.
+The outer front/back edges have an adjustable **0.5 mm chamfer**.
+The model uses the repository's bundled BOSL2 library; no separate library
+installation, assets, or `OPENSCADPATH` setting is required.
 
 The detailed flare curvature, toe radius, and bend amount were not measured.
 The smooth contour and **3 mm midplane tip offset** are adjustable modeling
@@ -25,10 +27,11 @@ Edit the source settings or use the OpenSCAD Customizer.
 | `overall_length` | `118.4` | Projected Y length from the top tip to the two lowest bottom points. |
 | `body_width` | `30` | Straight body width; the top semicircle radius is half this value. |
 | `base_width` | `40` | Maximum width of the flared bottom. |
-| `plate_thickness` | `5` | Thickness normal to the straight or curved side profile. |
+| `plate_thickness` | `5` | Thickness normal to the side profile, away from the beveled perimeter. |
 | `flare_start_from_top` | `90` | Start of the flare, 28.4 mm above the bottom with the default length. |
 | `bottom_rise` | `3` | Height of the inward-curving bottom edge at its center. |
 | `toe_radius` | `5` | **Unmeasured** rounded-toe radius; adjust to match the original contour. |
+| `edge_chamfer` | `0.5` | Equal edge setback and depth on both outer faces; `0` restores sharp edges. |
 | `bend_start_from_top` | `87` | Start of the out-of-plane bend, measured from the rounded top tip. |
 | `bend_tip_offset` | `3` | **Provisional** signed midplane offset at the bottom; positive bends toward the recessed face. |
 | `large_hole_diameter` | `12` | Diameter of the large through-hole. |
@@ -80,10 +83,29 @@ With a zero offset, the bend-start setting has no effect.
 
 The broad-face silhouette and its 118.4 mm projected length are unchanged;
 the curved surface is slightly longer than its Y projection. The default
-overall Z height is approximately 8.047 mm, even though the plate itself
-remains 5 mm thick. All mounting features stay in the straight section, so
+overall Z height is approximately 7.950 mm with the default edge chamfer,
+or 8.047 mm with sharp edges, even though the plate itself remains 5 mm thick
+away from the perimeter. All mounting features stay in the straight section, so
 the 8 mm recess offset, hole positions, diameters, and 2 mm recess floor
 remain unchanged.
+
+## Outer edge chamfer
+
+`edge_chamfer=0.5` removes an equal 0.5 mm setback and depth at the front and
+back outer perimeter. This is a **45-degree flat bevel in the straight section**,
+carried along the curved side profile, not a rounded fillet.
+The maximum 30 mm body width, 40 mm base width, 118.4 mm projected length,
+and the unchamfered interior thickness remain unchanged. The flat face itself
+is inset at its perimeter.
+
+Only the outside edges are beveled. The mounting holes and capsule recess
+are cut afterward, so their diameters, positions, recess depth, and floor
+thickness stay unchanged and their rims remain sharp. Set `edge_chamfer=0`
+to restore the previous sharp-edge geometry.
+
+BOSL2 builds the edge treatment as a solid mesh. Its faces are subdivided
+before bending so the bevel follows the curved end without flattening the
+bend or filling the inward-curving bottom outline.
 
 ## Valid settings
 
@@ -108,6 +130,9 @@ silently changing a dimension:
   Mounting holes and the entire recess must stay above the bend. Disable the
   bend with `bend_tip_offset=0` to use mounting features farther down the plate.
 - Outline and bend resolutions must be even integers of at least 8.
+- The chamfer must be nonnegative and smaller than half the plate thickness
+  and the toe radius. It must leave full-width material around the mounting
+  holes and recess, including above the recess's top edge.
 
 These checks keep the features in a conservative interior region; they do not
 establish the part's mechanical strength or real-world fit.
@@ -158,11 +183,12 @@ $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
 node --test designs\boston-hs40-foot\tests\model.test.mjs
 ```
 
-Checks render the defaults, a resized model, a reversed bend, and flat-profile
-variants with mounting features above and below the large hole. They verify
+Checks render the defaults, a resized model, a reversed bend, flat-profile
+variants, and the sharp-edge option. They verify
 one connected watertight shell, projected outline dimensions, the exact bend
 start, bent-tip positions, normal plate thickness, the semicircular top, body
-and flare widths, rounded toes, bottom rise, hole positions and diameters,
+and flare widths, rounded toes, bottom rise, equal chamfer depth and setback
+on both straight and bent edges, hole positions and diameters,
 capsule ends and footprint, recess depth, and remaining floor. They also check
 rejected settings and that rendering preserves the saved source. These are
 geometry checks, not mechanical qualification.

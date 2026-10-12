@@ -12,6 +12,13 @@ bottom_rise = 3;
 // Unmeasured contour choice; adjust to match the original toes.
 toe_radius = 5;
 
+/* [Side-profile bend] */
+// Distance down from the rounded top tip to the start of the bend.
+bend_start_from_top = 87;
+// Provisional midplane tip offset; positive bends toward the recessed face.
+// Set to zero for the original flat profile, or negative to reverse the bend.
+bend_tip_offset = 3;
+
 /* [Large through-hole] */
 large_hole_diameter = 12;
 large_hole_from_top = 56;
@@ -28,6 +35,7 @@ small_hole_diameter = 6.3;
 /* [Hidden] */
 epsilon = 0.01;
 curve_steps = 48;
+bend_steps = 48;
 $fn = 96;
 
 top_radius = body_width / 2;
@@ -35,6 +43,10 @@ top_center_y = overall_length - top_radius;
 flare_y = overall_length - flare_start_from_top;
 flare_run = flare_y - toe_radius;
 toe_center_x = base_width / 2 - toe_radius;
+bend_y = overall_length - bend_start_from_top;
+bend_direction = sign(bend_tip_offset);
+bend_radius = bend_tip_offset == 0 ? 0
+    : (bend_y^2 + bend_tip_offset^2) / (2 * abs(bend_tip_offset));
 large_hole_y = overall_length - large_hole_from_top;
 recess_hole_ys = [
     overall_length - recess_start_from_top - recess_width / 2,
@@ -74,6 +86,19 @@ assert(large_hole_from_top + large_hole_diameter / 2 < recess_start_from_top
     || large_hole_from_top - large_hole_diameter / 2
         > recess_start_from_top + recess_length,
     "Large hole must not overlap the capsule recess.");
+assert(bend_steps >= 8 && bend_steps % 2 == 0,
+    "Bend steps must be an even integer of at least 8.");
+assert(bend_tip_offset == 0 || (bend_y > toe_radius && bend_y < top_center_y),
+    "Bend must start below the top cap and above the rounded toes.");
+assert(bend_tip_offset == 0 || abs(bend_tip_offset) < bend_y,
+    "Tip offset must be smaller than the bent section's projected length.");
+assert(bend_tip_offset == 0 || bend_radius - plate_thickness / 2 > bend_y,
+    "Bend is too tight to preserve the plate thickness.");
+assert(bend_tip_offset == 0 || max(
+    large_hole_from_top + large_hole_diameter / 2,
+    recess_start_from_top + recess_length
+) < bend_start_from_top,
+    "Mounting holes and recess must stay above the bend; set bend_tip_offset=0 for a flat profile.");
 
 function cubic_bezier(points, t) =
     (1 - t)^3 * points[0]
@@ -110,6 +135,41 @@ function outline_points() = concat(
     [for (i = [1 : curve_steps]) flare_point(1 - i / curve_steps)]
 );
 
+// Concentric circular faces preserve thickness normal to the curved profile.
+function profile_z(y, front) = bend_tip_offset == 0 || y >= bend_y
+    ? (front ? plate_thickness : 0)
+    : plate_thickness / 2 + bend_direction * (bend_radius - sqrt(
+        (bend_radius - bend_direction * (front ? plate_thickness / 2
+            : -plate_thickness / 2))^2 - (bend_y - y)^2
+    ));
+
+function side_profile_points() = concat(
+    [for (i = [0 : bend_steps])
+        let(y = bend_y * i / bend_steps) [y, profile_z(y, false)]],
+    [[overall_length, 0], [overall_length, plate_thickness]],
+    [for (i = [bend_steps : -1 : 0])
+        let(y = bend_y * i / bend_steps) [y, profile_z(y, true)]]
+);
+
+module plate_body() {
+    if (bend_tip_offset == 0) {
+        linear_extrude(height = plate_thickness)
+            polygon(outline_points());
+    } else {
+        min_z = min(0, profile_z(0, false));
+        max_z = max(plate_thickness, profile_z(0, true));
+        intersection() {
+            translate([0, 0, min_z - epsilon])
+                linear_extrude(height = max_z - min_z + 2 * epsilon)
+                    polygon(outline_points());
+
+            rotate([90, 0, 90])
+                linear_extrude(height = base_width + 2 * epsilon, center = true)
+                    polygon(side_profile_points());
+        }
+    }
+}
+
 module through_hole(y, diameter) {
     translate([0, y, -epsilon])
         cylinder(d = diameter, h = plate_thickness + 2 * epsilon);
@@ -124,8 +184,7 @@ module recess_outline() {
 
 module speaker_foot() {
     difference() {
-        linear_extrude(height = plate_thickness)
-            polygon(outline_points());
+        plate_body();
 
         through_hole(large_hole_y, large_hole_diameter);
         for (y = recess_hole_ys)

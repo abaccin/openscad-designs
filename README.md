@@ -13,6 +13,7 @@ OpenSCAD 2021.01 or later is required. The chandelier's
 | [Drawer box](designs/drawer-box/README.md) | [round_box_drawer.scad](designs/drawer-box/round_box_drawer.scad) | Rounded organizer with dividers, stacking, sliding or magnetic lids, and optional multi-color decoration. |
 | [Pipe clamp](designs/pipe-clamp/README.md) | [pipe_clamp.scad](designs/pipe-clamp/pipe_clamp.scad) | Split circular clamp with tightening tabs and a transverse screw hole; defaults to a 20 mm pipe bore. |
 | [Chandelier](designs/chandelier/README.md) | [chandelier.scad](designs/chandelier/chandelier.scad) | Flanged base and ellipsoidal dome joined by coarse, clearance-adjustable BOSL2 threads, with print and assembled layouts. |
+| [Boston HS 40 speaker foot](designs/boston-hs40-foot/README.md) | [boston_hs40_foot.scad](designs/boston-hs40-foot/boston_hs40_foot.scad) | Flat replacement speaker foot with a rounded, flared outline, three through-holes, and a capsule recess. |
 
 Open a design's `.scad` file, adjust its settings, preview with **F5**, then
 render with **F6** before exporting. Keep any referenced assets beside the
@@ -43,6 +44,10 @@ designs\
   chandelier\
     README.md
     chandelier.scad
+    tests\
+  boston-hs40-foot\
+    README.md
+    boston_hs40_foot.scad
     tests\
 tests\
   helpers\
@@ -78,6 +83,7 @@ From the repository root, run an individual design's checks or the full collecti
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
 node --test designs\pipe-clamp\tests\model.test.mjs
 node --test designs\chandelier\tests\model.test.mjs
+node --test designs\boston-hs40-foot\tests\model.test.mjs
 node --test
 ```
 

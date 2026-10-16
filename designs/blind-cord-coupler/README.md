@@ -2,49 +2,78 @@
 
 [All designs](../../README.md)
 
-A one-piece, parametric **six-thin-cords to one thicker pull-cord** connector.
-It is a rounded plate with six small through-holes in two rows of three and
-one larger hole at the opposite end. Each cord is retained by its own exposed
-stopper knot. There are no covers, screws, clips, or glue.
+A **15 mm outside-diameter round cord coupler** with **six small holes equally
+spaced around one larger central hole**, plus a separate screw-on cover that
+encloses all seven stopper knots. The body and cover have the same 15 mm
+outside diameter; the cover does not increase the finished width.
 
-The default plate is **28 x 36 x 6 mm**. Cord diameters of **1 mm and 3 mm** are
-provisional, not measurements of your blind. With the default 0.4 mm diametral
-clearance, the straight bores are **1.4 mm and 3.4 mm** across. Both mouths of
-each hole have a 0.4 mm, 45-degree chamfer.
+The default assembled height is **14.5 mm**. Provisional cord diameters are
+**1 mm for the six thin cords and 3 mm for the central pull cord**, giving
+1.4 mm and 3.4 mm straight bores with the default clearance. Thin-hole centers
+are on an 8.2 mm diameter circle at 60-degree intervals.
+
+**Routing choice:** all seven cords pass from the flat exterior face into the
+body, and all seven knots are inside the covered chamber. The cover is closed,
+with no cord exit. This is not an opposite-end-entry cord condenser. A raised
+central seat places the thicker cord's knot above the six smaller knots to
+reduce crowding in the compact enclosure. Actual knot sizes still need checking.
+
+The body is the load-bearing cord attachment; the threaded cover shields the
+knots and can be removed for adjustment. No glue or separate fasteners are needed.
+The model uses the already bundled [BOSL2](../../include/README.md) thread library.
 
 ## Important safety limits
 
 **This is an untested rigid prototype, not a certified blind-cord breakaway
-safety connector.** The missing original connector may have served a safety
-function. Check the blind manufacturer's requirements first; use a compatible
-manufacturer-approved replacement if a safety/breakaway connector is required.
-Do not replace or bypass required safety devices with this plate.
+safety connector.** The missing original part may have had a safety function.
+Check the blind manufacturer's requirements first and use a compatible
+manufacturer-approved replacement where required. Do not replace or bypass a
+required safety device with this coupler.
 
 Accessible blind cords and loops can strangle children. Do not create a
-continuous pull loop, and keep cords out of children's reach using the blind
-manufacturer's approved cord-management arrangements. This design does not
-establish compliance with blind-cord safety standards.
+continuous pull loop. Keep cords out of children's reach with the manufacturer's
+approved cord-management arrangements. Concealing the knots does not remove
+cord-entanglement hazards or establish compliance with safety standards.
 
-Printed strength, knot security, cord wear, release behavior, and operation on
-an actual blind have not been physically verified. Dimensional guards are
-geometry checks, not a load rating or safety certification.
+Printed strength, thread retention, knot security, abrasion, and operation on
+the actual blind remain physically unverified. The 15 mm diameter requires
+thin walls: the default male thread root wall is nominally **0.85 mm**, and the
+female thread's minimum outside wall is approximately **0.84 mm**. These are
+geometry dimensions, not a load rating.
 
-## Restoring the missing travel
+## Cord extensions and fitting
 
-If the old connector hits the top cord lock/headrail before the blind reaches
-the bottom, **adding length only below it to the thick pull cord will not
-help**. Each of the six short thin cords needs a suitable extension so the
-new connector can sit farther below the mechanism.
+If the existing connector hits the headrail before the blind fully lowers,
+extend **each of the six thin cords**, not just the thicker pull cord. Obtain
+suitable extension cord and follow the blind/cord supplier's joining guidance.
+The printed parts do not supply the missing cord length.
 
-This model supplies the connector, not the extra cord. Obtain six suitable
-thin-cord extensions, a thicker pull cord, and a cord-compatible joining method
-recommended by the blind/cord supplier. The supplier's knot or splice guidance
-takes precedence; this design does not validate a particular joining method.
+Support the bottom rail, establish a fully lowered and level position, and
+adjust the six effective lengths individually. Do not assume the original
+cords should be cut to equal lengths or cut them shorter to fit this part.
+Keep every extension joint, knot, and the complete coupler below and clear of
+the cord lock/headrail throughout the full travel. If an original end or joint
+must enter the lock, replace/rethread the lift cord instead.
 
-**Every extension joint, knot, and the plate must remain outside and clear of
-the cord lock/headrail throughout the entire travel**, including fully lowered.
-If an original cord end or a joint must enter the lock, replace/rethread the
-lift cord instead of forcing a splice or knot through the mechanism.
+With the cover removed, pass all cords through the body from its flat bottom
+face into the open chamber. Pass each thin cord through a peripheral hole and
+the thick cord through the center and raised seat. Tie supplier-appropriate
+stopper knots on the chamber side, larger than their straight bores. Adjust
+the lengths with the rail supported and level.
+
+Check the tightened knots and their tails fit freely before screwing on the
+cover. The chamber is **10.8 mm across**, with **10 mm height above the floor**
+and **7 mm above the raised central seat**. The six small knots must fit below
+and around the larger central knot; these are available cavity dimensions, not
+guaranteed knot capacities. Keep knots and tails out of the thread and never
+use the cover to crush them into place. Increase enclosure dimensions if the
+actual knots do not fit. Do not shorten required knot tails just to close it.
+
+Close the cover by hand without forcing it or twisting the attached cords.
+With the rail supported, check retention and the whole raise/lower range.
+Stop at slipping knots, catching, uneven travel, cracking, loosening, or wear.
+Do not force a joint or the coupler into the cord lock. A successful print is
+not proof of a safe installation; inspect the parts and cords during use.
 
 ## Parameters
 
@@ -52,115 +81,104 @@ All dimensions are millimeters. Edit the source or use OpenSCAD's Customizer.
 
 | Parameter | Default | Meaning |
 | --- | --- | --- |
-| `thin_cord_diameter` | `1` | Measured diameter of each of the six thin cords. |
-| `pull_cord_diameter` | `3` | Measured diameter of the single thicker pull cord. |
-| `hole_clearance` | `0.4` | Added to each cord's diameter, not radius; does not include chamfers. |
-| `plate_width` | `28` | Overall X dimension. |
-| `plate_length` | `36` | Overall Y dimension. |
-| `plate_thickness` | `6` | Overall Z dimension; the bottom face is at Z=0. |
-| `corner_radius` | `3` | Outline corner radius; zero gives square corners. |
-| `thin_column_spacing` | `8` | Center-to-center X spacing; columns are at minus this value, zero, and plus this value. |
-| `thin_row_spacing` | `6` | Center-to-center Y spacing of the two thin-cord rows. |
-| `thin_edge_distance` | `6` | Distance from the positive-Y edge to the upper row's centers. |
-| `pull_edge_distance` | `8` | Distance from the negative-Y edge to the pull hole's center. |
-| `mouth_chamfer` | `0.4` | Equal depth and radial widening at both mouths; zero disables chamfers. |
-| `minimum_wall` | `2` | Minimum nominal material between hole mouths or from a mouth to the rounded perimeter. Not a strength guarantee. |
+| `part` | `"all"` | Both components, `"body"`, or `"cover"`. |
+| `layout` | `"print"` | Parts on the bed, or `"assembled"` for a closed preview. |
+| `print_gap` | `4` | Edge-to-edge spacing between parts in the print layout. |
+| `thin_cord_diameter` | `1` | Diameter of each thin cord; measure before printing. |
+| `pull_cord_diameter` | `3` | Diameter of the central pull cord; measure before printing. |
+| `hole_clearance` | `0.4` | Added to cord diameters, not radii. |
+| `coupler_diameter` | `15` | Finished outside diameter of the flange and cover. |
+| `floor_thickness` | `3` | Body floor thickness. |
+| `hole_circle_diameter` | `8.2` | Circle through the six peripheral hole centers. |
+| `mouth_chamfer` | `0.2` | 45-degree depth/widening on both ends of each bore; zero disables it. |
+| `central_seat_height` | `3` | Height of the raised large-knot seat above the floor; zero disables it. |
+| `cover_height` | `11.5` | Cover height; assembled height is this plus the body floor thickness. |
+| `cover_top_thickness` | `1.5` | Thickness of the cover's closed top. |
+| `cavity_diameter` | `10.8` | Inside diameter of the knot chamber and body collar. |
+| `thread_diameter` | `13` | Male thread's major diameter. |
+| `thread_length` | `3.6` | Collar height above the body floor; three default pitches. |
+| `thread_pitch` | `1.2` | Single-start trapezoidal thread pitch. |
+| `thread_depth` | `0.25` | Crest-to-root radial depth. |
+| `thread_clearance` | `0.15` | Radial clearance per side, added to the female thread only. |
+| `thread_axial_clearance` | `0.2` | Empty pocket beyond the male thread tip. |
+| `minimum_wall` | `0.8` | Nominal minimum thread/root and hole-separation wall. Not a strength guarantee. |
+| `radial_segments` | `64` | Circular resolution; a multiple of four, at least 48. |
 
-In the default layout, thin-hole centers are X=-8, 0, 8 at Y=12 and Y=6.
-The pull-hole center is X=0, Y=-10. The plate is centered on X=0, Y=0.
+The central seat's radius is derived from the large mouth radius plus
+`minimum_wall`. Central bore length is `floor_thickness + central_seat_height`;
+each small bore is only `floor_thickness` long. Mouth diameters are straight
+bore diameters plus `2 * mouth_chamfer`.
 
-The straight bore diameter is `cord_diameter + hole_clearance`; the face
-opening diameter additionally includes `2 * mouth_chamfer`. The straight
-section's length is `plate_thickness - 2 * mouth_chamfer`.
+Assertions reject overlapping bores, holes outside the cavity, a seat covering
+small holes, insufficient male/female thread walls, excessive socket depth,
+and invalid sizes, layouts, or chamfers. Increasing clearance may require
+changing other dimensions to retain walls. Defaults at 15 mm are compact;
+increase the overall diameter if larger cords, knots, or printer tolerances
+cannot fit. Circular tessellation contributes a small additional female thread
+allowance, matching the repository's chandelier thread construction.
 
-Assertions reject nonpositive sizes/spacing, negative clearances, corner
-radii reaching half either plate dimension, chamfers consuming the straight
-bore, and insufficient material between mouths or around the actual rounded
-outline. Increase the plate size or adjust hole layout when increasing cord
-sizes. Clearances are nominal; printed dimensions and knot sizes still need
-checking. Hole positions do not allow for the size of knots themselves: make
-sure adjacent knots do not crowd or displace one another.
+**Migrating from the rectangular version:** the plate width/length, corner
+radius, and row/column layout settings have been replaced by the circular
+dimensions above. Re-export the model; old plate STLs are not compatible with
+this cover. Knot routing has changed so that all knots are on the covered side.
 
-## Preview and export
+## Preview, printing, and export
 
 Open `designs\blind-cord-coupler\blind_cord_coupler.scad` in OpenSCAD 2021.01
-or later. Preview with **F5**, adjust dimensions, then render with **F6** and
-export as STL. No fonts, assets, or external libraries are required.
+or later. The default print layout shows both components separately. The body
+rests on its flat cord-entry face; the cover rests on its closed top with its
+opening upward. Preview with **F5**, render with **F6**, then export.
+Select `layout="assembled"` to view the closed result, not to export a
+print-in-place assembly.
 
-From the repository root in PowerShell:
+No library installation or `OPENSCADPATH` configuration is needed. From the
+repository root in PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force designs\blind-cord-coupler\exports | Out-Null
 & 'C:\Program Files\OpenSCAD\openscad.exe' `
   -o designs\blind-cord-coupler\exports\blind-cord-coupler.stl `
   designs\blind-cord-coupler\blind_cord_coupler.scad | Out-Host
+
+& 'C:\Program Files\OpenSCAD\openscad.exe' `
+  -D 'part="body"' `
+  -o designs\blind-cord-coupler\exports\blind-cord-coupler-body.stl `
+  designs\blind-cord-coupler\blind_cord_coupler.scad | Out-Host
+
+& 'C:\Program Files\OpenSCAD\openscad.exe' `
+  -D 'part="cover"' `
+  -o designs\blind-cord-coupler\exports\blind-cord-coupler-cover.stl `
+  designs\blind-cord-coupler\blind_cord_coupler.scad | Out-Host
 ```
 
-Use your executable path, or `openscad` if it is on PATH. For other cord sizes,
-add definitions such as `-D 'thin_cord_diameter=1.4'` and
-`-D 'pull_cord_diameter=4'` before the source argument. Generated exports are
-ignored by Git. Piping to `Out-Host` makes PowerShell wait for the Windows
-OpenSCAD executable to finish.
+Use your executable path, or `openscad` if it is on PATH. `Out-Host` makes
+PowerShell wait for the Windows executable. Exports are ignored by Git.
+The combined STL contains two separated printable parts; the individual
+exports each contain just the selected component, resting at Z=0.
 
-## Printing and fitting
+PETG is a starting material choice, not a safety rating. Start with a 0.4 mm
+nozzle, 0.15 mm layers, two continuous wall lines, and solid floors/top.
+Inspect the sliced thin thread walls and small bores. The open-up cover avoids
+bridging its entire roof, and 45-degree thread flanks and mouth chamfers are
+intended to print without support. Do a fit print first; fine threads and
+small bores may need printer-specific adjustment.
 
-Print flat with a broad face on the bed, as modeled, with the seven bores
-vertical. The outline and 45-degree mouth chamfers are intended to print
-without support. PETG is a starting material choice; for a 0.4 mm nozzle, start
-with 0.2 mm layers, at least four perimeters, and a solid plate. These settings
-are not a load rating. Inspect the sliced small holes and both mouth chamfers;
-printer accuracy can close small holes or leave rough edges.
-
-Print a fit sample first using the actual cord and intended knots. The default
-plate itself is small enough to use as that sample. Adjust `hole_clearance`
-for your printer rather than assuming a nominal 1.4 mm hole will fit.
-Remove brim/support remnants and deburr/smooth both faces of every hole without
-enlarging the straight bore enough to let its tightened stopper knot pull
-through. Chamfers reduce sharp edges but do not guarantee freedom from wear.
-
-## Threading and adjustment
-
-Only proceed if a rigid connector is appropriate under the manufacturer's
-safety requirements.
-
-1. Support the bottom rail and release the existing connector without allowing
-   the cords to retract or the blind to fall. Do not cut the original cords
-   shorter. Establish the full lowered position with the rail level.
-2. Extend each thin cord separately using suitable cord and the supplier's
-   joining instructions. Set the new connector position far enough below the
-   headrail that all six joints and the connector stay clear at full lowering.
-3. Pass each thin extension through its own small hole from face A to face B,
-   then tie a suitable stopper knot on face B. Adjust the six effective lengths
-   individually while the supported rail is level. Do not assume the original
-   cords or their extensions must all be cut to identical lengths.
-4. Pass the thick pull cord through the large hole from face B to face A and
-   tie its stopper knot on face A. This leaves its free pull end on face B;
-   the six incoming thin cords are on face A. Do not join free ends into a loop.
-5. Check that every tightened knot is larger than its bore and cannot pull
-   through, that knots do not interfere with one another, and that no cord is
-   pinched or rubbing a rough edge. Leave tails appropriate to the cord and
-   joining method; do not rely on an untested knot or glue.
-6. With the rail supported, check retention and move carefully through the
-   entire raise/lower range. Stop at slipping knots, uneven movement, catching,
-   cracking, or abrasion. Never force a connector or joint into the cord lock.
-   If full travel cannot be achieved with all joints outside the mechanism,
-   replace/rethread the lift cords or use the approved replacement hardware.
-
-Do not consider the installation proven by a successful print. Inspect cords,
-knots, and the plate for wear during use, and discontinue use if damaged.
+Deburr the cord-contact mouths without enlarging bores enough for knots to
+pull through. Check the cover turns freely without cross-threading or
+loosening, and do not use glue to conceal poor fit. These settings do not
+establish printed strength, knot retention, or a reliable thread fit.
 
 ## Regression checks
-
-From the repository root, with Node.js 18+ and OpenSCAD installed:
 
 ```powershell
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
 node --test designs\blind-cord-coupler\tests\model.test.mjs
 ```
 
-Checks render the default, resized, unchamfered, and large-corner layouts.
-They verify one connected watertight mesh, bounds and corner radii, all seven
-bores, both mouth chamfers, retained straight bore sections, and solid
-ligaments. Invalid-parameter checks cover overlapping holes, rounded-perimeter
-clearance, and chamfer limits. Rendering must not modify the saved source.
-These checks do not validate the physical installation or mechanical safety.
+Node.js 18+ and OpenSCAD are required. Tests check two separate watertight
+printable components, the default 15 mm envelope, all six 60-degree peripheral
+holes and the central hole, chamfers, raised seat, enclosed knot space, resized
+dimensions, and individual-part exports. They also check mating poses for solid
+interference and deliberately misphase the threads to verify actual engagement.
+Invalid-input checks assert the intended diagnostics, and rendering must leave
+saved settings unchanged. Physical operation and mechanical safety are not tested.

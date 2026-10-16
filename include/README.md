@@ -10,7 +10,8 @@ Keep this folder at the repository root.
 - Upstream: [BelfrySCAD/BOSL2](https://github.com/BelfrySCAD/BOSL2).
 - Revision: `d6d184505210c8b7bee76c4195905a34e7ded1a5`.
 - License: [BSD-2-Clause](BOSL2/LICENSE), with upstream notices preserved.
-- Used by: [Chandelier](../designs/chandelier/README.md) and
+- Used by: [Blind cord coupler](../designs/blind-cord-coupler/README.md),
+  [Chandelier](../designs/chandelier/README.md), and
   [Boston HS 40 speaker foot](../designs/boston-hs40-foot/README.md).
 
 `BOSL2` contains unmodified copies of `std.scad`, `threading.scad`, and every
@@ -19,6 +20,6 @@ optional modules, examples, documentation, and upstream tests are not bundled.
 
 To update, copy both entry points and their complete transitive include/use
 dependencies from one upstream revision, preserve the license and source
-notices, update the revision above, and run the chandelier and speaker-foot
-regression checks.
+notices, update the revision above, and run the blind-cord-coupler, chandelier,
+and speaker-foot regression checks.
 Do not edit individual vendored files or mix revisions.

@@ -12,6 +12,7 @@ OpenSCAD 2021.01 or later is required. The chandelier and speaker foot use
 | --- | --- | --- |
 | [Drawer box](designs/drawer-box/README.md) | [round_box_drawer.scad](designs/drawer-box/round_box_drawer.scad) | Rounded organizer with dividers, stacking, sliding or magnetic lids, and optional multi-color decoration. |
 | [Pipe clamp](designs/pipe-clamp/README.md) | [pipe_clamp.scad](designs/pipe-clamp/pipe_clamp.scad) | Split circular clamp with tightening tabs and a transverse screw hole; defaults to a 20 mm pipe bore. |
+| [Blind cord coupler](designs/blind-cord-coupler/README.md) | [blind_cord_coupler.scad](designs/blind-cord-coupler/blind_cord_coupler.scad) | One-piece six-to-one cord plate with adjustable bores and chamfered mouths; untested prototype, not a certified breakaway safety connector. |
 | [Chandelier](designs/chandelier/README.md) | [chandelier.scad](designs/chandelier/chandelier.scad) | Flanged base and ellipsoidal dome joined by coarse, clearance-adjustable BOSL2 threads, with print and assembled layouts. |
 | [Boston HS 40 speaker foot](designs/boston-hs40-foot/README.md) | [boston_hs40_foot.scad](designs/boston-hs40-foot/boston_hs40_foot.scad) | Bent-profile replacement speaker foot with chamfered outer edges, a flared outline, three through-holes, and a capsule recess. |
 
@@ -40,6 +41,10 @@ designs\
   pipe-clamp\
     README.md
     pipe_clamp.scad
+    tests\
+  blind-cord-coupler\
+    README.md
+    blind_cord_coupler.scad
     tests\
   chandelier\
     README.md
@@ -82,6 +87,7 @@ From the repository root, run an individual design's checks or the full collecti
 ```powershell
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
 node --test designs\pipe-clamp\tests\model.test.mjs
+node --test designs\blind-cord-coupler\tests\model.test.mjs
 node --test designs\chandelier\tests\model.test.mjs
 node --test designs\boston-hs40-foot\tests\model.test.mjs
 node --test

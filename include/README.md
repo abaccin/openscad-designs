@@ -1,9 +1,33 @@
 # Shared includes
 
-This folder contains the third-party OpenSCAD libraries required by the
+This folder contains shared helpers and the third-party OpenSCAD libraries required by the
 designs. Models reference these files using paths relative to their own source
 files; no separate installation or `OPENSCADPATH` setting is required.
 Keep this folder at the repository root.
+
+## Assertion diagnostics
+
+`assertions.scad` provides the project-authored `assertion_message(message, values)`
+function. Use it as the message argument of native `assert()`, including assertions
+inside functions. Pass `[name, value]` pairs for the relevant settings and any
+calculated bounds:
+
+```openscad
+use <../../include/assertions.scad>
+
+assert(cornerRadius > wallThickness + slidingFloorRadius,
+    assertion_message("Corner radius must clear the rounded floor.", [
+        ["cornerRadius", cornerRadius],
+        ["wallThickness", wallThickness],
+        ["slidingFloorRadius", slidingFloorRadius],
+        ["minimum cornerRadius (exclusive)", wallThickness + slidingFloorRadius]
+    ]));
+```
+
+Messages retain the rule and append `Values: name=value, ...`. Strings are quoted,
+tabs and line breaks are escaped, and lists, booleans, and `undef` retain their
+types. This keeps the formatting consistent without changing assertion conditions,
+source locations, or geometry. Empty value lists leave the original message unchanged.
 
 ## BOSL2
 

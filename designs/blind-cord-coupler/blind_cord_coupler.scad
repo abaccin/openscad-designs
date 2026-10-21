@@ -3,6 +3,7 @@
 
 include <../../include/BOSL2/std.scad>
 include <../../include/BOSL2/threading.scad>
+use <../../include/assertions.scad>
 
 /* [Output] */
 part = "all"; // [all, body, cover]
@@ -61,49 +62,82 @@ function female_mask_radius() =
 
 module validate_coupler() {
     assert(part == "all" || part == "body" || part == "cover",
-        "Part must be all, body, or cover.");
+        assertion_message("Part must be all, body, or cover.", [["part", part]]));
     assert(layout == "print" || layout == "assembled",
-        "Layout must be print or assembled.");
-    assert(print_gap > 0, "Print gap must be positive.");
+        assertion_message("Layout must be print or assembled.", [["layout", layout]]));
+    assert(print_gap > 0, assertion_message("Print gap must be positive.", [["print_gap", print_gap]]));
     assert(coupler_diameter > 0 && floor_thickness > 0,
-        "Coupler diameter and floor thickness must be positive.");
+        assertion_message("Coupler diameter and floor thickness must be positive.",
+            [["coupler_diameter", coupler_diameter], ["floor_thickness", floor_thickness]]));
     assert(thin_cord_diameter > 0 && pull_cord_diameter > 0,
-        "Both cord diameters must be positive.");
-    assert(hole_clearance >= 0, "Hole clearance must be nonnegative.");
-    assert(hole_circle_diameter > 0, "Hole circle diameter must be positive.");
+        assertion_message("Both cord diameters must be positive.",
+            [["thin_cord_diameter", thin_cord_diameter], ["pull_cord_diameter", pull_cord_diameter]]));
+    assert(hole_clearance >= 0, assertion_message("Hole clearance must be nonnegative.", [["hole_clearance", hole_clearance]]));
+    assert(hole_circle_diameter > 0,
+        assertion_message("Hole circle diameter must be positive.", [["hole_circle_diameter", hole_circle_diameter]]));
     assert(mouth_chamfer >= 0 && 2 * mouth_chamfer < floor_thickness,
-        "Mouth chamfer must be nonnegative and leave a straight bore section.");
-    assert(minimum_wall > 0, "Minimum wall must be positive.");
+        assertion_message("Mouth chamfer must be nonnegative and leave a straight bore section.",
+            [["mouth_chamfer", mouth_chamfer], ["floor_thickness", floor_thickness]]));
+    assert(minimum_wall > 0, assertion_message("Minimum wall must be positive.", [["minimum_wall", minimum_wall]]));
     assert(radial_segments >= 48 && radial_segments % 4 == 0,
-        "Radial segments must be a multiple of four and at least 48.");
+        assertion_message("Radial segments must be a multiple of four and at least 48.", [["radial_segments", radial_segments]]));
     assert(cover_height > 0 && cover_top_thickness >= minimum_wall,
-        "Cover height must be positive and its closed top must retain minimum_wall.");
+        assertion_message("Cover height must be positive and its closed top must retain minimum_wall.",
+            [["cover_height", cover_height], ["cover_top_thickness", cover_top_thickness], ["minimum_wall", minimum_wall]]));
     assert(central_seat_height >= 0 && central_seat_height < knot_chamber_height,
-        "Central seat height must be nonnegative and below the cover ceiling.");
+        assertion_message("Central seat height must be nonnegative and below the cover ceiling.",
+            [["central_seat_height", central_seat_height], ["cover_height", cover_height],
+             ["cover_top_thickness", cover_top_thickness], ["knot_chamber_height", knot_chamber_height]]));
     assert(thread_diameter > 0 && thread_length > 0 && thread_pitch > 0 && thread_depth > 0,
-        "Thread diameter, length, pitch, and depth must be positive.");
+        assertion_message("Thread diameter, length, pitch, and depth must be positive.",
+            [["thread_diameter", thread_diameter], ["thread_length", thread_length], ["thread_pitch", thread_pitch], ["thread_depth", thread_depth]]));
     assert(thread_clearance >= 0 && thread_axial_clearance >= 0,
-        "Thread clearances must be nonnegative.");
+        assertion_message("Thread clearances must be nonnegative.",
+            [["thread_clearance", thread_clearance], ["thread_axial_clearance", thread_axial_clearance]]));
     assert(thread_depth < thread_pitch / 2,
-        "Thread depth must be less than half the pitch to retain flat crests.");
+        assertion_message("Thread depth must be less than half the pitch to retain flat crests.",
+            [["thread_depth", thread_depth], ["thread_pitch", thread_pitch], ["maximum depth (exclusive)", thread_pitch / 2]]));
     assert(thread_length >= 2 * thread_pitch,
-        "Thread length must accommodate at least two full pitches.");
+        assertion_message("Thread length must accommodate at least two full pitches.",
+            [["thread_length", thread_length], ["thread_pitch", thread_pitch], ["minimum length", 2 * thread_pitch]]));
     assert(thread_length + thread_axial_clearance < knot_chamber_height,
-        "Thread socket must end below the knot chamber ceiling.");
+        assertion_message("Thread socket must end below the knot chamber ceiling.",
+            [["thread_length", thread_length], ["thread_axial_clearance", thread_axial_clearance], ["cover_height", cover_height],
+             ["cover_top_thickness", cover_top_thickness], ["socket top", thread_length + thread_axial_clearance],
+             ["knot_chamber_height", knot_chamber_height]]));
     assert(cavity_diameter > 0
         && thread_diameter / 2 - thread_depth - cavity_diameter / 2 >= minimum_wall,
-        "Male thread roots must retain minimum_wall around the knot cavity.");
+        assertion_message("Male thread roots must retain minimum_wall around the knot cavity.",
+            [["cavity_diameter", cavity_diameter], ["thread_diameter", thread_diameter], ["thread_depth", thread_depth],
+             ["minimum_wall", minimum_wall], ["remaining wall", thread_diameter / 2 - thread_depth - cavity_diameter / 2]]));
     assert(coupler_diameter / 2 - female_mask_radius() >= minimum_wall,
-        "Cover must retain minimum_wall outside the female thread.");
+        assertion_message("Cover must retain minimum_wall outside the female thread.",
+            [["coupler_diameter", coupler_diameter], ["thread_diameter", thread_diameter], ["thread_clearance", thread_clearance],
+             ["radial_segments", radial_segments], ["minimum_wall", minimum_wall], ["female_mask_radius()", female_mask_radius()],
+             ["remaining wall", coupler_diameter / 2 - female_mask_radius()]]));
     assert(cavity_diameter / 2 >= hole_circle_diameter / 2 + thin_mouth_radius,
-        "All six thin-hole mouths must open inside the knot cavity.");
+        assertion_message("All six thin-hole mouths must open inside the knot cavity.",
+            [["cavity_diameter", cavity_diameter], ["hole_circle_diameter", hole_circle_diameter],
+             ["thin_cord_diameter", thin_cord_diameter], ["hole_clearance", hole_clearance], ["mouth_chamfer", mouth_chamfer],
+             ["thin_mouth_radius", thin_mouth_radius], ["minimum cavity diameter", hole_circle_diameter + 2 * thin_mouth_radius]]));
     assert(hole_circle_diameter / 2 - thin_mouth_radius - pull_mouth_radius >= minimum_wall,
-        "Thin holes must leave minimum_wall around the central pull hole.");
+        assertion_message("Thin holes must leave minimum_wall around the central pull hole.",
+            [["hole_circle_diameter", hole_circle_diameter], ["thin_cord_diameter", thin_cord_diameter],
+             ["pull_cord_diameter", pull_cord_diameter], ["hole_clearance", hole_clearance], ["mouth_chamfer", mouth_chamfer],
+             ["thin_mouth_radius", thin_mouth_radius], ["pull_mouth_radius", pull_mouth_radius], ["minimum_wall", minimum_wall],
+             ["remaining wall", hole_circle_diameter / 2 - thin_mouth_radius - pull_mouth_radius]]));
     assert(hole_circle_diameter / 2 - 2 * thin_mouth_radius >= minimum_wall,
-        "Adjacent thin holes must retain minimum_wall between their mouths.");
+        assertion_message("Adjacent thin holes must retain minimum_wall between their mouths.",
+            [["hole_circle_diameter", hole_circle_diameter], ["thin_cord_diameter", thin_cord_diameter],
+             ["hole_clearance", hole_clearance], ["mouth_chamfer", mouth_chamfer], ["thin_mouth_radius", thin_mouth_radius],
+             ["minimum_wall", minimum_wall], ["remaining wall", hole_circle_diameter / 2 - 2 * thin_mouth_radius]]));
     assert(central_seat_height == 0
         || hole_circle_diameter / 2 - thin_mouth_radius > central_seat_radius,
-        "Raised central seat must not cover the six thin-hole mouths.");
+        assertion_message("Raised central seat must not cover the six thin-hole mouths.",
+            [["central_seat_height", central_seat_height], ["hole_circle_diameter", hole_circle_diameter],
+             ["thin_cord_diameter", thin_cord_diameter], ["pull_cord_diameter", pull_cord_diameter], ["hole_clearance", hole_clearance],
+             ["mouth_chamfer", mouth_chamfer], ["minimum_wall", minimum_wall], ["thin_mouth_radius", thin_mouth_radius],
+             ["central_seat_radius", central_seat_radius], ["available radius", hole_circle_diameter / 2 - thin_mouth_radius]]));
     children();
 }
 

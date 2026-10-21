@@ -1,6 +1,7 @@
 // Boston HS 40 speaker foot. All dimensions are millimeters.
 
 include <../../include/BOSL2/std.scad>
+use <../../include/assertions.scad>
 
 /* [Outline] */
 overall_length = 118.4;
@@ -60,58 +61,94 @@ recess_hole_ys = [
 ];
 
 assert(body_width > 0 && overall_length > top_radius,
-    "Body width must be positive and overall length must exceed the top radius.");
+    assertion_message("Body width must be positive and overall length must exceed the top radius.",
+        [["body_width", body_width], ["overall_length", overall_length], ["top_radius", top_radius]]));
 assert(plate_thickness > 0 && base_width >= body_width,
-    "Plate thickness must be positive and base width must be at least body width.");
+    assertion_message("Plate thickness must be positive and base width must be at least body width.",
+        [["plate_thickness", plate_thickness], ["base_width", base_width], ["body_width", body_width]]));
 assert(toe_radius > 0 && toe_radius < base_width / 2,
-    "Toe radius must be positive and smaller than half the base width.");
+    assertion_message("Toe radius must be positive and smaller than half the base width.",
+        [["toe_radius", toe_radius], ["base_width", base_width], ["maximum radius (exclusive)", base_width / 2]]));
 assert(flare_y > toe_radius && flare_y < top_center_y,
-    "Flare must start below the top cap and above the rounded toes.");
+    assertion_message("Flare must start below the top cap and above the rounded toes.",
+        [["flare_start_from_top", flare_start_from_top], ["overall_length", overall_length], ["body_width", body_width],
+         ["toe_radius", toe_radius], ["flare_y", flare_y], ["top_center_y", top_center_y]]));
 assert(bottom_rise >= 0 && bottom_rise < toe_radius,
-    "Bottom rise must be nonnegative and smaller than the toe radius.");
+    assertion_message("Bottom rise must be nonnegative and smaller than the toe radius.",
+        [["bottom_rise", bottom_rise], ["toe_radius", toe_radius]]));
 assert(curve_steps >= 8 && curve_steps % 2 == 0,
-    "Curve steps must be an even integer of at least 8.");
+    assertion_message("Curve steps must be an even integer of at least 8.", [["curve_steps", curve_steps]]));
 assert(large_hole_diameter > 0 && large_hole_diameter < body_width,
-    "Large hole diameter must be positive and smaller than the body width.");
+    assertion_message("Large hole diameter must be positive and smaller than the body width.",
+        [["large_hole_diameter", large_hole_diameter], ["body_width", body_width]]));
 assert(large_hole_from_top - large_hole_diameter / 2 > top_radius
     && large_hole_from_top + large_hole_diameter / 2 < overall_length - toe_radius,
-    "Large hole must stay below the top cap and above the toe region.");
+    assertion_message("Large hole must stay below the top cap and above the toe region.",
+        [["large_hole_from_top", large_hole_from_top], ["large_hole_diameter", large_hole_diameter], ["overall_length", overall_length],
+         ["body_width", body_width], ["top_radius", top_radius], ["toe_radius", toe_radius],
+         ["hole extent from top", [large_hole_from_top - large_hole_diameter / 2, large_hole_from_top + large_hole_diameter / 2]]]));
 assert(recess_width > 0 && recess_width < body_width
     && recess_length > recess_width,
-    "Recess width must fit the body and capsule length must exceed its width.");
+    assertion_message("Recess width must fit the body and capsule length must exceed its width.",
+        [["recess_width", recess_width], ["body_width", body_width], ["recess_length", recess_length]]));
 assert(recess_depth > 0 && recess_depth < plate_thickness,
-    "Recess depth must be positive and leave a solid floor.");
+    assertion_message("Recess depth must be positive and leave a solid floor.",
+        [["recess_depth", recess_depth], ["plate_thickness", plate_thickness]]));
 assert(recess_start_from_top > 0
     && recess_start_from_top + recess_length < overall_length - toe_radius,
-    "Recess must stay below the top tip and above the toe region.");
+    assertion_message("Recess must stay below the top tip and above the toe region.",
+        [["recess_start_from_top", recess_start_from_top], ["recess_length", recess_length], ["overall_length", overall_length],
+         ["toe_radius", toe_radius], ["recess end", recess_start_from_top + recess_length],
+         ["toe region starts", overall_length - toe_radius]]));
 assert(small_hole_diameter > 0 && small_hole_diameter < recess_width,
-    "Small hole diameter must be positive and smaller than the recess width.");
+    assertion_message("Small hole diameter must be positive and smaller than the recess width.",
+        [["small_hole_diameter", small_hole_diameter], ["recess_width", recess_width]]));
 assert(recess_length - recess_width > small_hole_diameter,
-    "Small holes must remain separate at the capsule's end-circle centers.");
+    assertion_message("Small holes must remain separate at the capsule's end-circle centers.",
+        [["recess_length", recess_length], ["recess_width", recess_width], ["small_hole_diameter", small_hole_diameter],
+         ["hole spacing", recess_length - recess_width]]));
 assert(large_hole_from_top + large_hole_diameter / 2 < recess_start_from_top
     || large_hole_from_top - large_hole_diameter / 2
         > recess_start_from_top + recess_length,
-    "Large hole must not overlap the capsule recess.");
+    assertion_message("Large hole must not overlap the capsule recess.",
+        [["large_hole_from_top", large_hole_from_top], ["large_hole_diameter", large_hole_diameter],
+         ["recess_start_from_top", recess_start_from_top], ["recess_length", recess_length],
+         ["hole extent from top", [large_hole_from_top - large_hole_diameter / 2, large_hole_from_top + large_hole_diameter / 2]],
+         ["recess extent from top", [recess_start_from_top, recess_start_from_top + recess_length]]]));
 assert(bend_steps >= 8 && bend_steps % 2 == 0,
-    "Bend steps must be an even integer of at least 8.");
+    assertion_message("Bend steps must be an even integer of at least 8.", [["bend_steps", bend_steps]]));
 assert(bend_tip_offset == 0 || (bend_y > toe_radius && bend_y < top_center_y),
-    "Bend must start below the top cap and above the rounded toes.");
+    assertion_message("Bend must start below the top cap and above the rounded toes.",
+        [["bend_tip_offset", bend_tip_offset], ["bend_start_from_top", bend_start_from_top], ["overall_length", overall_length],
+         ["body_width", body_width], ["toe_radius", toe_radius], ["bend_y", bend_y], ["top_center_y", top_center_y]]));
 assert(bend_tip_offset == 0 || abs(bend_tip_offset) < bend_y,
-    "Tip offset must be smaller than the bent section's projected length.");
+    assertion_message("Tip offset must be smaller than the bent section's projected length.",
+        [["bend_tip_offset", bend_tip_offset], ["bend_start_from_top", bend_start_from_top],
+         ["overall_length", overall_length], ["bend_y", bend_y]]));
 assert(bend_tip_offset == 0 || bend_radius - plate_thickness / 2 > bend_y,
-    "Bend is too tight to preserve the plate thickness.");
+    assertion_message("Bend is too tight to preserve the plate thickness.",
+        [["bend_tip_offset", bend_tip_offset], ["bend_start_from_top", bend_start_from_top], ["overall_length", overall_length],
+         ["plate_thickness", plate_thickness], ["bend_radius", bend_radius], ["bend_y", bend_y]]));
 assert(bend_tip_offset == 0 || max(
     large_hole_from_top + large_hole_diameter / 2,
     recess_start_from_top + recess_length
 ) < bend_start_from_top,
-    "Mounting holes and recess must stay above the bend; set bend_tip_offset=0 for a flat profile.");
+    assertion_message("Mounting holes and recess must stay above the bend; set bend_tip_offset=0 for a flat profile.",
+        [["bend_tip_offset", bend_tip_offset], ["bend_start_from_top", bend_start_from_top], ["large_hole_from_top", large_hole_from_top],
+         ["large_hole_diameter", large_hole_diameter], ["recess_start_from_top", recess_start_from_top], ["recess_length", recess_length],
+         ["lowest feature", max(large_hole_from_top + large_hole_diameter / 2, recess_start_from_top + recess_length)]]));
 assert(edge_chamfer >= 0 && edge_chamfer < plate_thickness / 2
     && edge_chamfer < toe_radius,
-    "Edge chamfer must be nonnegative and smaller than half the thickness and the toe radius.");
+    assertion_message("Edge chamfer must be nonnegative and smaller than half the thickness and the toe radius.",
+        [["edge_chamfer", edge_chamfer], ["plate_thickness", plate_thickness], ["toe_radius", toe_radius],
+         ["maximum chamfer (exclusive)", min(plate_thickness / 2, toe_radius)]]));
 assert(large_hole_diameter + 2 * edge_chamfer < body_width
     && recess_width + 2 * edge_chamfer < body_width
     && recess_start_from_top > edge_chamfer,
-    "Chamfer must leave full-width rims around the mounting holes and recess.");
+    assertion_message("Chamfer must leave full-width rims around the mounting holes and recess.",
+        [["large_hole_diameter", large_hole_diameter], ["edge_chamfer", edge_chamfer], ["body_width", body_width],
+         ["recess_width", recess_width], ["recess_start_from_top", recess_start_from_top],
+         ["chamfered hole width", large_hole_diameter + 2 * edge_chamfer], ["chamfered recess width", recess_width + 2 * edge_chamfer]]));
 
 function cubic_bezier(points, t) =
     (1 - t)^3 * points[0]

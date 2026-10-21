@@ -21,6 +21,13 @@ Open a design's `.scad` file, adjust its settings, preview with **F5**, then
 render with **F6** before exporting. Keep any referenced assets beside the
 source. See each design's README for fit, printing, and export instructions.
 
+Model assertion failures name the relevant settings and show their current values,
+plus calculated limits where useful. For example, an invalid sliding corner reports
+`cornerRadius=5`, `wallThickness=2.5`, `slidingFloorRadius=3`, and
+`minimum cornerRadius (exclusive)=5.5`. Adjust the named settings in the Customizer
+or source, then preview again. Formatting is shared through
+[`include\assertions.scad`](include/assertions.scad); bundled BOSL2 assertions are unchanged.
+
 ## Repository layout
 
 ```text
@@ -61,7 +68,7 @@ tests\
 ```
 
 Design-specific scripts and tests live with their design. Reusable mesh
-checks live in the root `tests\helpers` directory. Shared third-party includes
+checks live in the root `tests\helpers` directory. Shared helpers and third-party includes
 live under `include`; see [their provenance and license](include/README.md).
 Generated files belong in an `exports` directory within the relevant design;
 `exports` directories
@@ -87,6 +94,7 @@ From the repository root, run an individual design's checks or the full collecti
 
 ```powershell
 $env:OPENSCAD='C:\Program Files\OpenSCAD\openscad.exe'
+node --test tests\assertions.test.mjs
 node --test designs\pipe-clamp\tests\model.test.mjs
 node --test designs\blind-cord-coupler\tests\model.test.mjs
 node --test designs\chandelier\tests\model.test.mjs

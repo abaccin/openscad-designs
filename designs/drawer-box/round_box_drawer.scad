@@ -177,26 +177,29 @@ internalClearance=0.5;
 
 /* [Hidden] */
 // End of user settings. Geometry and calculated values below do not need editing.
+use <../../include/assertions.scad>
+
 // Legacy flat-plate setting; ignored by the external-rim sliding design.
 lidEdgeThickness=0.5;
-assert(is_bool(withLid),"withLid must be true or false.");
-assert(is_bool(withStacking),"withStacking must be true or false.");
-assert(is_bool(withLidLogo),"withLidLogo must be true or false.");
-assert(is_bool(withLidText),"withLidText must be true or false.");
-assert(is_bool(withColorInlay),"withColorInlay must be true or false.");
+assert(is_bool(withLid),assertion_message("withLid must be true or false.",[["withLid",withLid]]));
+assert(is_bool(withStacking),assertion_message("withStacking must be true or false.",[["withStacking",withStacking]]));
+assert(is_bool(withLidLogo),assertion_message("withLidLogo must be true or false.",[["withLidLogo",withLidLogo]]));
+assert(is_bool(withLidText),assertion_message("withLidText must be true or false.",[["withLidText",withLidText]]));
+assert(is_bool(withColorInlay),assertion_message("withColorInlay must be true or false.",[["withColorInlay",withColorInlay]]));
 for (setting=[["boxColor",boxColor],["lidColor",lidColor],["robotColor",robotColor],
 			 ["logoColor",logoColor],["textColor",textColor]])
 	assert(validColor(setting[1]),
-		   str(setting[0]," must be a nonempty color name/hex string or an RGB/RGBA vector with numeric components from 0 to 1."));
+		   assertion_message(str(setting[0]," must be a nonempty color name/hex string or an RGB/RGBA vector with numeric components from 0 to 1."),
+							 [setting]));
 assert(colorShown=="all" || colorShown=="box" || colorShown=="lid" ||
 	   colorShown=="robot" || colorShown=="logo" || colorShown=="text",
-	   "colorShown must be all, box, lid, robot, logo, or text.");
+	   assertion_message("colorShown must be all, box, lid, robot, logo, or text.",[["colorShown",colorShown]]));
 assert(is_num(internalClearance) && internalClearance>0,
-	   "internalClearance must be positive.");
+	   assertion_message("internalClearance must be positive.",[["internalClearance",internalClearance]]));
 assert(itemsShown=="both" || itemsShown=="box" || itemsShown=="lid",
-	   "itemsShown must be both, box, or lid.");
+	   assertion_message("itemsShown must be both, box, or lid.",[["itemsShown",itemsShown]]));
 assert(lidStyle=="sliding" || lidStyle=="magnetic",
-	   "lidStyle must be sliding or magnetic.");
+	   assertion_message("lidStyle must be sliding or magnetic.",[["lidStyle",lidStyle]]));
 
 function validColor(value)=
 	is_string(value) ? len(value)>0 :
@@ -291,29 +294,39 @@ module lidInlays(magnetic=false,selected=colorShown){
 module lidTextChecks(l,w,h,et){
 	if (withLidText){
 		assert(is_string(lidText) && len(lidText)>0,
-			   "lidText must be a nonempty string when withLidText=true.");
+			   assertion_message("lidText must be a nonempty string when withLidText=true.",
+								 [["lidText",lidText],["withLidText",withLidText]]));
 		assert(len([for (i=[0:len(lidText)-1]) if (lidText[i]!=" ") i])>0,
-			   "lidText must contain visible characters.");
+			   assertion_message("lidText must contain visible characters.",[["lidText",lidText]]));
 		assert(len([for (i=[0:len(lidText)-1])
 					if (lidText[i]=="\n" || lidText[i]=="\r" || lidText[i]=="\t") i])==0,
-			   "lidText must be a single line without tabs or line breaks.");
+			   assertion_message("lidText must be a single line without tabs or line breaks.",[["lidText",lidText]]));
 		assert(is_string(lidTextFont) && len(lidTextFont)>0,
-			   "lidTextFont must name an installed font from Help > Font List.");
-		assert(is_num(lidTextSize) && lidTextSize>0,"lidTextSize must be positive.");
+			   assertion_message("lidTextFont must name an installed font from Help > Font List.",[["lidTextFont",lidTextFont]]));
+		assert(is_num(lidTextSize) && lidTextSize>0,assertion_message("lidTextSize must be positive.",[["lidTextSize",lidTextSize]]));
 		assert(is_num(lidTextDepth) && lidTextDepth>0 && lidTextDepth<h,
-			   "lidTextDepth must be positive and less than the active lid thickness.");
+			   assertion_message("lidTextDepth must be positive and less than the active lid thickness.",
+								 [["lidTextDepth",lidTextDepth],["h",h]]));
 		assert(is_num(lidTextBandHeight) && lidTextBandHeight>0 && lidTextBandHeight<w,
-			   "lidTextBandHeight must be positive and smaller than the lid width.");
+			   assertion_message("lidTextBandHeight must be positive and smaller than the lid width.",
+								 [["lidTextBandHeight",lidTextBandHeight],["w",w]]));
 		assert(is_num(lidTextMargin) && lidTextMargin>=h-et+internalClearance,
-			   "lidTextMargin must clear the lid edge by internalClearance.");
+			   assertion_message("lidTextMargin must clear the lid edge by internalClearance.",
+								 [["lidTextMargin",lidTextMargin],["h",h],["et",et],["internalClearance",internalClearance],
+								  ["minimum margin",h-et+internalClearance]]));
 		assert(is_undef(lidTextPositionX) || is_num(lidTextPositionX),
-			   "lidTextPositionX must be a number or undef for centered text.");
+			   assertion_message("lidTextPositionX must be a number or undef for centered text.",[["lidTextPositionX",lidTextPositionX]]));
 		assert(is_undef(lidTextPositionY) || is_num(lidTextPositionY),
-			   "lidTextPositionY must be a number or undef for centered text.");
+			   assertion_message("lidTextPositionY must be a number or undef for centered text.",[["lidTextPositionY",lidTextPositionY]]));
 		assert(lidTextBandHeight>=1.5*lidTextSize+2*lidTextMargin,
-			   "lidTextBandHeight must be at least 1.5*lidTextSize + 2*lidTextMargin for font ascenders/descenders.");
+			   assertion_message("lidTextBandHeight must be at least 1.5*lidTextSize + 2*lidTextMargin for font ascenders/descenders.",
+								 [["lidTextBandHeight",lidTextBandHeight],["lidTextSize",lidTextSize],["lidTextMargin",lidTextMargin],
+								  ["minimum band height",1.5*lidTextSize+2*lidTextMargin]]));
 		assert(l>(withLidLogo ? lidLogoSize+2*lidLogoMargin : 0)+2*lidTextMargin,
-			   "The lid must leave space for text beside the logo strip.");
+			   assertion_message("The lid must leave space for text beside the logo strip.",
+								 [["l",l],["withLidLogo",withLidLogo],["lidLogoSize",lidLogoSize],["lidLogoMargin",lidLogoMargin],
+								  ["lidTextMargin",lidTextMargin],
+								  ["minimum length (exclusive)",(withLidLogo ? lidLogoSize+2*lidLogoMargin : 0)+2*lidTextMargin]]));
 	}
 	children();
 }
@@ -342,12 +355,15 @@ module lidDecorations(l,w,h,et,cutter=true,part="all"){
 module lidArtwork(l,w,h,cutter=true){
 	padding=lidArtworkMargin+lidArtworkLineGrowth;
 	artworkLength=min(l-2*padding,(w-2*padding)*lidArtworkAspect);
-	assert(lidArtworkAspect>0,"Lid artwork aspect ratio must be positive.");
+	assert(lidArtworkAspect>0,assertion_message("Lid artwork aspect ratio must be positive.",[["lidArtworkAspect",lidArtworkAspect]]));
 	assert(lidArtworkDepth>0 && lidArtworkDepth<h,
-		   "Lid artwork depth must be positive and less than the lid thickness.");
-	assert(lidArtworkMargin>=0,"Lid artwork margin cannot be negative.");
-	assert(lidArtworkLineGrowth>=0,"Lid artwork line growth cannot be negative.");
-	assert(l>2*padding && w>2*padding,"The lid is too small for the artwork margins.");
+		   assertion_message("Lid artwork depth must be positive and less than the lid thickness.",[["lidArtworkDepth",lidArtworkDepth],["h",h]]));
+	assert(lidArtworkMargin>=0,assertion_message("Lid artwork margin cannot be negative.",[["lidArtworkMargin",lidArtworkMargin]]));
+	assert(lidArtworkLineGrowth>=0,assertion_message("Lid artwork line growth cannot be negative.",[["lidArtworkLineGrowth",lidArtworkLineGrowth]]));
+	assert(l>2*padding && w>2*padding,
+		   assertion_message("The lid is too small for the artwork margins.",
+							 [["l",l],["w",w],["lidArtworkMargin",lidArtworkMargin],["lidArtworkLineGrowth",lidArtworkLineGrowth],
+							  ["padding",padding],["minimum length/width (exclusive)",2*padding]]));
 
 	extrudeHeight=cutter ? lidArtworkDepth+0.01 : lidArtworkDepth;
 	translate([l/2,-w/2,h-lidArtworkDepth])
@@ -359,13 +375,17 @@ module lidArtwork(l,w,h,cutter=true){
 }
 
 module lidLogo(l,w,h,et,cutter=true){
-	assert(lidLogoSize>0,"Lid logo size must be positive.");
+	assert(lidLogoSize>0,assertion_message("Lid logo size must be positive.",[["lidLogoSize",lidLogoSize]]));
 	assert(lidLogoDepth>0 && lidLogoDepth<h,
-		   "Lid logo depth must be positive and less than the lid thickness.");
+		   assertion_message("Lid logo depth must be positive and less than the lid thickness.",[["lidLogoDepth",lidLogoDepth],["h",h]]));
 	assert(lidLogoMargin>=h-et+internalClearance,
-		   "Lid logo margin must clear the lid edge by internalClearance.");
+		   assertion_message("Lid logo margin must clear the lid edge by internalClearance.",
+							 [["lidLogoMargin",lidLogoMargin],["h",h],["et",et],["internalClearance",internalClearance],
+							  ["minimum margin",h-et+internalClearance]]));
 	assert(lidLogoSize+2*lidLogoMargin<min(l,w),
-		   "The lid is too small for the logo and its margins.");
+		   assertion_message("The lid is too small for the logo and its margins.",
+							 [["lidLogoSize",lidLogoSize],["lidLogoMargin",lidLogoMargin],["l",l],["w",w],
+							  ["logo span",lidLogoSize+2*lidLogoMargin],["available span",min(l,w)]]));
 
 	extrudeHeight=cutter ? lidLogoDepth+0.01 : lidLogoDepth;
 	translate([lidLogoMargin+lidLogoSize/2,-w/2,h-lidLogoDepth])
@@ -416,69 +436,119 @@ module slidingChecks(){
 				  ["slidingSkirtThickness",slidingSkirtThickness],
 				  ["slidingRailDepth",slidingRailDepth],
 				  ["slidingVerticalClearance",slidingVerticalClearance]])
-		assert(is_num(setting[1]) && setting[1]>0,str(setting[0]," must be positive."));
+		assert(is_num(setting[1]) && setting[1]>0,assertion_message(str(setting[0]," must be positive."),[setting]));
 	for (setting=[["slidingFloorRadius",slidingFloorRadius],
 				  ["slidingEdgeChamfer",slidingEdgeChamfer]])
-		assert(is_num(setting[1]) && setting[1]>=0,str(setting[0]," must be nonnegative."));
-	assert(is_bool(withSlidingGrip),"withSlidingGrip must be true or false.");
-	assert(is_bool(withSlidingLock),"withSlidingLock must be true or false.");
-	assert(is_bool(withNotch),"withNotch must be true or false.");
+		assert(is_num(setting[1]) && setting[1]>=0,assertion_message(str(setting[0]," must be nonnegative."),[setting]));
+	assert(is_bool(withSlidingGrip),assertion_message("withSlidingGrip must be true or false.",[["withSlidingGrip",withSlidingGrip]]));
+	assert(is_bool(withSlidingLock),assertion_message("withSlidingLock must be true or false.",[["withSlidingLock",withSlidingLock]]));
+	assert(is_bool(withNotch),assertion_message("withNotch must be true or false.",[["withNotch",withNotch]]));
 	assert(is_num(wallThickness) && wallThickness>0 &&
 		   is_num(boxLength) && boxLength>2*wallThickness &&
 		   is_num(boxWidth) && boxWidth>2*wallThickness,
-		   "Box length and width must exceed twice the positive wall thickness.");
+		   assertion_message("Box length and width must exceed twice the positive wall thickness.",
+							 [["boxLength",boxLength],["boxWidth",boxWidth],["wallThickness",wallThickness]]));
 	assert(is_num(cornerRadius) && cornerRadius>wallThickness+slidingFloorRadius &&
 		   2*cornerRadius<min(boxLength,boxWidth),
-		   "Sliding corner radius must exceed wallThickness + slidingFloorRadius and leave straight sides.");
+		   assertion_message("Sliding corner radius must exceed wallThickness + slidingFloorRadius and leave straight sides.",
+							 [["cornerRadius",cornerRadius],["wallThickness",wallThickness],["slidingFloorRadius",slidingFloorRadius],
+							  ["boxLength",boxLength],["boxWidth",boxWidth],
+							  ["minimum cornerRadius (exclusive)",wallThickness+slidingFloorRadius],
+							  ["maximum cornerRadius (exclusive)",min(boxLength,boxWidth)/2]]));
 	assert(is_num(bottomThickness) && bottomThickness>0 && is_num(boxHeight),
-		   "bottomThickness must be positive and boxHeight must be numeric.");
+		   assertion_message("bottomThickness must be positive and boxHeight must be numeric.",
+							 [["bottomThickness",bottomThickness],["boxHeight",boxHeight]]));
 	assert(wallThickness-slidingRimInset()>=0.8-0.000001,
-		   "Sliding rim must retain 0.8 mm of wall; increase wallThickness or reduce slidingSkirtThickness/lidClearance.");
+		   assertion_message("Sliding rim must retain 0.8 mm of wall; increase wallThickness or reduce slidingSkirtThickness/lidClearance.",
+							 [["wallThickness",wallThickness],["slidingSkirtThickness",slidingSkirtThickness],["lidClearance",lidClearance],
+							  ["remaining wall",wallThickness-slidingRimInset()]]));
 	assert(slidingSkirtThickness-slidingRailDepth>=0.8-0.000001,
-		   "Sliding groove must retain 0.8 mm of skin; increase slidingSkirtThickness or reduce slidingRailDepth.");
+		   assertion_message("Sliding groove must retain 0.8 mm of skin; increase slidingSkirtThickness or reduce slidingRailDepth.",
+							 [["slidingSkirtThickness",slidingSkirtThickness],["slidingRailDepth",slidingRailDepth],
+							  ["remaining skin",slidingSkirtThickness-slidingRailDepth]]));
 	assert(slidingRailDepth>lidClearance/2,
-		   "slidingRailDepth must exceed lidClearance/2 to capture the lid.");
+		   assertion_message("slidingRailDepth must exceed lidClearance/2 to capture the lid.",
+							 [["slidingRailDepth",slidingRailDepth],["lidClearance",lidClearance],["lidClearance/2",lidClearance/2]]));
 	assert(slidingEdgeChamfer<min(bottomThickness,lidThickness,slidingSkirtThickness),
-		   "slidingEdgeChamfer must be smaller than the floor, lid plate, and skirt thicknesses.");
+		   assertion_message("slidingEdgeChamfer must be smaller than the floor, lid plate, and skirt thicknesses.",
+							 [["slidingEdgeChamfer",slidingEdgeChamfer],["bottomThickness",bottomThickness],
+							  ["lidThickness",lidThickness],["slidingSkirtThickness",slidingSkirtThickness]]));
 	assert(slidingShoulder()>bottomThickness+slidingFloorRadius+internalClearance,
-		   "Sliding skirt shoulder must clear the rounded floor; increase boxHeight or reduce slidingSkirtDepth/slidingFloorRadius.");
+		   assertion_message("Sliding skirt shoulder must clear the rounded floor; increase boxHeight or reduce slidingSkirtDepth/slidingFloorRadius.",
+							 [["boxHeight",boxHeight],["lidThickness",lidThickness],["slidingSkirtDepth",slidingSkirtDepth],
+							  ["slidingVerticalClearance",slidingVerticalClearance],["bottomThickness",bottomThickness],
+							  ["slidingFloorRadius",slidingFloorRadius],["internalClearance",internalClearance],
+							  ["slidingShoulder()",slidingShoulder()],
+							  ["minimum shoulder (exclusive)",bottomThickness+slidingFloorRadius+internalClearance]]));
 	assert(slidingSkirtDepth/3>=slidingRailDepth+slidingRailHalfFlat()+slidingVerticalClearance+0.801,
-		   "Sliding rail must retain 0.8 mm below the plate; increase slidingSkirtDepth or reduce rail depth/vertical clearance.");
+		   assertion_message("Sliding rail must retain 0.8 mm below the plate; increase slidingSkirtDepth or reduce rail depth/vertical clearance.",
+							 [["slidingSkirtDepth",slidingSkirtDepth],["slidingRailDepth",slidingRailDepth],
+							  ["slidingVerticalClearance",slidingVerticalClearance],["slidingSkirtDepth/3",slidingSkirtDepth/3],
+							  ["required minimum",slidingRailDepth+slidingRailHalfFlat()+slidingVerticalClearance+0.801]]));
 	assert(2*slidingSkirtDepth/3>=slidingRailDepth+slidingRailHalfFlat()+slidingVerticalClearance+
 		   (withNotch ? 1.5 : 0)+0.801,
-		   "Sliding groove must retain 0.8 mm above the skirt tip/recess; increase slidingSkirtDepth or reduce rail depth/vertical clearance.");
+		   assertion_message("Sliding groove must retain 0.8 mm above the skirt tip/recess; increase slidingSkirtDepth or reduce rail depth/vertical clearance.",
+							 [["slidingSkirtDepth",slidingSkirtDepth],["slidingRailDepth",slidingRailDepth],
+							  ["slidingVerticalClearance",slidingVerticalClearance],["withNotch",withNotch],
+							  ["2*slidingSkirtDepth/3",2*slidingSkirtDepth/3],
+							  ["required minimum",slidingRailDepth+slidingRailHalfFlat()+slidingVerticalClearance+(withNotch ? 1.5 : 0)+0.801]]));
 	if (withSlidingGrip){
 		assert(is_num(slidingGripProjection) && slidingGripProjection>0,
-			   "slidingGripProjection must be positive when withSlidingGrip=true.");
+			   assertion_message("slidingGripProjection must be positive when withSlidingGrip=true.",
+								 [["slidingGripProjection",slidingGripProjection],["withSlidingGrip",withSlidingGrip]]));
 		assert(slidingGripSpan()>=1.2,
-			   "Sliding grips need 1.2 mm of straight side beyond the lock; increase boxLength or disable the grips/lock.");
+			   assertion_message("Sliding grips need 1.2 mm of straight side beyond the lock; increase boxLength or disable the grips/lock.",
+								 [["boxLength",boxLength],["cornerRadius",cornerRadius],["lidClearance",lidClearance],
+								  ["withSlidingLock",withSlidingLock],["slidingGripSpan()",slidingGripSpan()]]));
 		assert(2*slidingGripProjection+0.4<=
 			   min(slidingSkirtDepth-0.5,slidingShoulder()-1-slidingBoxGripLow()),
-			   "Sliding grip ramps need more height; reduce slidingGripProjection or increase skirt depth/box height.");
+			   assertion_message("Sliding grip ramps need more height; reduce slidingGripProjection or increase skirt depth/box height.",
+								 [["slidingGripProjection",slidingGripProjection],["slidingSkirtDepth",slidingSkirtDepth],["boxHeight",boxHeight],
+								  ["lidThickness",lidThickness],["slidingVerticalClearance",slidingVerticalClearance],
+								  ["slidingEdgeChamfer",slidingEdgeChamfer],["required height",2*slidingGripProjection+0.4],
+								  ["available height",min(slidingSkirtDepth-0.5,slidingShoulder()-1-slidingBoxGripLow())]]));
 	}
 	if (withSlidingLock){
 		assert(is_num(slidingLockInterference) && slidingLockInterference>0,
-			   "slidingLockInterference must be positive when withSlidingLock=true.");
+			   assertion_message("slidingLockInterference must be positive when withSlidingLock=true.",
+								 [["slidingLockInterference",slidingLockInterference],["withSlidingLock",withSlidingLock]]));
 		assert(slidingLockRootX()+4<=boxLength-cornerRadius,
-			   "Sliding lock needs a 16 mm spring and 4 mm root before the end corner; increase boxLength or disable the lock.");
+			   assertion_message("Sliding lock needs a 16 mm spring and 4 mm root before the end corner; increase boxLength or disable the lock.",
+								 [["boxLength",boxLength],["cornerRadius",cornerRadius],["lidClearance",lidClearance],
+								  ["required end X",slidingLockRootX()+4],["available end X",boxLength-cornerRadius]]));
 		assert(slidingLockSlotZ()-0.3-
 			   (lidThickness+slidingSkirtDepth/3+1.5*slidingRailDepth+slidingVerticalClearance)>=0.8-0.000001,
-			   "Sliding lock slot must clear the groove by 0.8 mm; increase slidingSkirtDepth or reduce rail depth/vertical clearance.");
+			   assertion_message("Sliding lock slot must clear the groove by 0.8 mm; increase slidingSkirtDepth or reduce rail depth/vertical clearance.",
+								 [["slidingSkirtDepth",slidingSkirtDepth],["lidThickness",lidThickness],["slidingRailDepth",slidingRailDepth],
+								  ["slidingVerticalClearance",slidingVerticalClearance],
+								  ["slot clearance",slidingLockSlotZ()-0.3-(lidThickness+slidingSkirtDepth/3+1.5*slidingRailDepth+slidingVerticalClearance)]]));
 		assert(slidingLockHalfHeight()>=slidingLockProjection()+0.1,
-			   "Sliding lock bump ramps need more tab height; increase slidingSkirtDepth or reduce lidClearance/slidingLockInterference.");
+			   assertion_message("Sliding lock bump ramps need more tab height; increase slidingSkirtDepth or reduce lidClearance/slidingLockInterference.",
+								 [["slidingSkirtDepth",slidingSkirtDepth],["lidClearance",lidClearance],["slidingLockInterference",slidingLockInterference],
+								  ["slidingLockHalfHeight()",slidingLockHalfHeight()],["required minimum",slidingLockProjection()+0.1]]));
 		assert(slidingSkirtThickness-slidingLockInterference-0.15>=0.8-0.000001,
-			   "Sliding lock pocket must retain 0.8 mm of skin; increase slidingSkirtThickness or reduce slidingLockInterference.");
+			   assertion_message("Sliding lock pocket must retain 0.8 mm of skin; increase slidingSkirtThickness or reduce slidingLockInterference.",
+								 [["slidingSkirtThickness",slidingSkirtThickness],["slidingLockInterference",slidingLockInterference],
+								  ["remaining skin",slidingSkirtThickness-slidingLockInterference-0.15]]));
 		assert(3*slidingSkirtThickness*slidingLockInterference/
 			   (2*pow(slidingLockRootX()-slidingLockX(),2))<=0.005,
-			   "Sliding lock deflection exceeds the conservative spring strain limit; reduce slidingLockInterference or slidingSkirtThickness.");
+			   assertion_message("Sliding lock deflection exceeds the conservative spring strain limit; reduce slidingLockInterference or slidingSkirtThickness.",
+								 [["slidingSkirtThickness",slidingSkirtThickness],["slidingLockInterference",slidingLockInterference],
+								  ["spring length",slidingLockRootX()-slidingLockX()],
+								  ["strain",3*slidingSkirtThickness*slidingLockInterference/(2*pow(slidingLockRootX()-slidingLockX(),2))],
+								  ["maximum strain",0.005]]));
 	}
 	if (dividerCountX>0 || dividerCountY>0)
 		assert(is_num(dividerHeight) && dividerHeight<=slidingDividerTop()-bottomThickness,
-			   str("dividerHeight must not exceed ",slidingDividerTop()-bottomThickness,
-				   " mm above the interior floor; leave clearance beneath the sliding plate."));
+			   assertion_message(str("dividerHeight must not exceed ",slidingDividerTop()-bottomThickness,
+									 " mm above the interior floor; leave clearance beneath the sliding plate."),
+								 [["dividerHeight",dividerHeight],["boxHeight",boxHeight],["lidThickness",lidThickness],
+								  ["internalClearance",internalClearance],["bottomThickness",bottomThickness]]));
 	if (pullLedges!="none")
 		assert(is_num(pullTopOffset) && pullTopOffset>=lidThickness+internalClearance,
-			   "pullTopOffset must clear the sliding plate: lidThickness + internalClearance.");
+			   assertion_message("pullTopOffset must clear the sliding plate: lidThickness + internalClearance.",
+								 [["pullTopOffset",pullTopOffset],["lidThickness",lidThickness],["internalClearance",internalClearance],
+								  ["minimum offset",lidThickness+internalClearance]]));
 	children();
 }
 
@@ -718,58 +788,87 @@ module magneticLipProfile(){
 
 module magneticChecks(){
 	assert(is_num(magneticLidThickness) && magneticLidThickness>0,
-		   "magneticLidThickness must be positive.");
+		   assertion_message("magneticLidThickness must be positive.",[["magneticLidThickness",magneticLidThickness]]));
 	assert(is_num(magnetDiameter) && magnetDiameter>0,
-		   "magnetDiameter must be positive.");
+		   assertion_message("magnetDiameter must be positive.",[["magnetDiameter",magnetDiameter]]));
 	assert(is_num(magnetThickness) && magnetThickness>0,
-		   "magnetThickness must be positive.");
+		   assertion_message("magnetThickness must be positive.",[["magnetThickness",magnetThickness]]));
 	assert(is_num(magnetPocketClearance) && magnetPocketClearance>=0,
-		   "magnetPocketClearance must be nonnegative (per side).");
+		   assertion_message("magnetPocketClearance must be nonnegative (per side).",[["magnetPocketClearance",magnetPocketClearance]]));
 	assert(is_num(magnetRecess) && magnetRecess>=0,
-		   "magnetRecess must be nonnegative.");
+		   assertion_message("magnetRecess must be nonnegative.",[["magnetRecess",magnetRecess]]));
 	assert(is_num(magneticLidClearance) && magneticLidClearance>0,
-		   "magneticLidClearance must be positive (per side).");
+		   assertion_message("magneticLidClearance must be positive (per side).",[["magneticLidClearance",magneticLidClearance]]));
 	assert(is_num(magneticLidLocatorDepth) && magneticLidLocatorDepth>0,
-		   "magneticLidLocatorDepth must be positive.");
+		   assertion_message("magneticLidLocatorDepth must be positive.",[["magneticLidLocatorDepth",magneticLidLocatorDepth]]));
 	assert(is_num(magneticLidLipThickness) && magneticLidLipThickness>0,
-		   "magneticLidLipThickness must be positive.");
-	assert(is_bool(withNotch),"withNotch must be true or false.");
+		   assertion_message("magneticLidLipThickness must be positive.",[["magneticLidLipThickness",magneticLidLipThickness]]));
+	assert(is_bool(withNotch),assertion_message("withNotch must be true or false.",[["withNotch",withNotch]]));
 	assert(is_num(wallThickness) && wallThickness>0 &&
 		   is_num(boxLength) && boxLength>2*wallThickness &&
 		   is_num(boxWidth) && boxWidth>2*wallThickness,
-		   "Box length and width must exceed twice the positive wall thickness.");
+		   assertion_message("Box length and width must exceed twice the positive wall thickness.",
+							 [["boxLength",boxLength],["boxWidth",boxWidth],["wallThickness",wallThickness]]));
 	assert(is_num(cornerRadius) && cornerRadius>wallThickness &&
 		   2*cornerRadius<=min(boxLength,boxWidth),
-		   "Corner radius must exceed wall thickness and fit within the box.");
+		   assertion_message("Corner radius must exceed wall thickness and fit within the box.",
+							 [["cornerRadius",cornerRadius],["wallThickness",wallThickness],["boxLength",boxLength],["boxWidth",boxWidth],
+							  ["minimum cornerRadius (exclusive)",wallThickness],["maximum cornerRadius",min(boxLength,boxWidth)/2]]));
 	assert(is_num(boxHeight) && is_num(bottomThickness) && bottomThickness>0,
-		   "Box height must be numeric and bottomThickness must be positive.");
+		   assertion_message("Box height must be numeric and bottomThickness must be positive.",
+							 [["boxHeight",boxHeight],["bottomThickness",bottomThickness]]));
 
 	let(padRadius=magnetPadRadius(),
 		seat=boxHeight-magneticLidThickness,
 		overlap=min(0.05,wallThickness/4),
 		gap=max(internalClearance,magneticLidClearance)){
 		assert(magneticLidThickness>=magnetPocketDepth()+1,
-			   "magneticLidThickness must leave at least 1 mm of skin above the magnet pockets.");
+			   assertion_message("magneticLidThickness must leave at least 1 mm of skin above the magnet pockets.",
+								 [["magneticLidThickness",magneticLidThickness],["magnetThickness",magnetThickness],["magnetRecess",magnetRecess],
+								  ["minimum thickness",magnetPocketDepth()+1]]));
 		assert(cornerRadius+2*padRadius+gap+magneticLidLipThickness<=boxLength/2 &&
 			   max(cornerRadius,wallThickness+2*padRadius)+gap+
 			   max(magneticLidLipThickness,withNotch ? 5 : 0)<=boxWidth/2,
-			   "Magnetic pads and inset lip must fit between the rounded corners; increase box length/width or reduce magnet size/corner radius/lip thickness.");
+			   assertion_message("Magnetic pads and inset lip must fit between the rounded corners; increase box length/width or reduce magnet size/corner radius/lip thickness.",
+								 [["boxLength",boxLength],["boxWidth",boxWidth],["cornerRadius",cornerRadius],["wallThickness",wallThickness],
+								  ["magnetDiameter",magnetDiameter],["magnetPocketClearance",magnetPocketClearance],
+								  ["magneticLidLipThickness",magneticLidLipThickness],["magneticLidClearance",magneticLidClearance],
+								  ["internalClearance",internalClearance],["withNotch",withNotch],["padRadius",padRadius],["gap",gap],
+								  ["minimum length",2*(cornerRadius+2*padRadius+gap+magneticLidLipThickness)],
+								  ["minimum width",2*(max(cornerRadius,wallThickness+2*padRadius)+gap+max(magneticLidLipThickness,withNotch ? 5 : 0))]]));
 		assert(min(boxLength,boxWidth)>2*(wallThickness+magneticLidClearance+magneticLidLipThickness)+internalClearance,
-			   "magneticLidClearance leaves no space inside the inset lip.");
+			   assertion_message("magneticLidClearance leaves no space inside the inset lip.",
+								 [["boxLength",boxLength],["boxWidth",boxWidth],["wallThickness",wallThickness],
+								  ["magneticLidClearance",magneticLidClearance],["magneticLidLipThickness",magneticLidLipThickness],
+								  ["internalClearance",internalClearance],
+								  ["minimum length/width (exclusive)",2*(wallThickness+magneticLidClearance+magneticLidLipThickness)+internalClearance]]));
 		assert(seat-magnetPocketDepth()-1-2*padRadius-overlap>=bottomThickness+internalClearance,
-			   "Magnetic pad undersides must clear the floor; increase boxHeight or reduce magnet size/thickness.");
+			   assertion_message("Magnetic pad undersides must clear the floor; increase boxHeight or reduce magnet size/thickness.",
+								 [["boxHeight",boxHeight],["magneticLidThickness",magneticLidThickness],["magnetThickness",magnetThickness],
+								  ["magnetRecess",magnetRecess],["magnetDiameter",magnetDiameter],["magnetPocketClearance",magnetPocketClearance],
+								  ["wallThickness",wallThickness],["bottomThickness",bottomThickness],["internalClearance",internalClearance],
+								  ["seat",seat],["padRadius",padRadius],["overlap",overlap],
+								  ["pad underside",seat-magnetPocketDepth()-1-2*padRadius-overlap],["minimum height",bottomThickness+internalClearance]]));
 		assert(seat-magneticLidLocatorDepth>=bottomThickness+internalClearance,
-			   "Magnetic inset lip must clear the floor; increase boxHeight or reduce magneticLidLocatorDepth.");
+			   assertion_message("Magnetic inset lip must clear the floor; increase boxHeight or reduce magneticLidLocatorDepth.",
+								 [["boxHeight",boxHeight],["magneticLidThickness",magneticLidThickness],["magneticLidLocatorDepth",magneticLidLocatorDepth],
+								  ["bottomThickness",bottomThickness],["internalClearance",internalClearance],
+								  ["lip underside",seat-magneticLidLocatorDepth],["minimum height",bottomThickness+internalClearance]]));
 		if (pullLedges!="none")
 			assert(is_num(pullTopOffset) &&
 				   pullTopOffset>=magneticLidThickness+magneticLidLocatorDepth+internalClearance,
-				   "pullTopOffset must clear the magnetic lip: magneticLidThickness + magneticLidLocatorDepth + internalClearance.");
+				   assertion_message("pullTopOffset must clear the magnetic lip: magneticLidThickness + magneticLidLocatorDepth + internalClearance.",
+									 [["pullTopOffset",pullTopOffset],["magneticLidThickness",magneticLidThickness],
+									  ["magneticLidLocatorDepth",magneticLidLocatorDepth],["internalClearance",internalClearance],
+									  ["minimum offset",magneticLidThickness+magneticLidLocatorDepth+internalClearance]]));
 		if (dividerCountX>0 || dividerCountY>0)
 			assert(is_num(dividerHeight) &&
 				   dividerHeight<=seat-bottomThickness-magneticLidLocatorDepth-internalClearance,
-				   str("dividerHeight must not exceed ",
-					   seat-bottomThickness-magneticLidLocatorDepth-internalClearance,
-					   " mm above the interior floor; leave clearance for the magnetic inset lip."));
+				   assertion_message(str("dividerHeight must not exceed ",seat-bottomThickness-magneticLidLocatorDepth-internalClearance,
+										 " mm above the interior floor; leave clearance for the magnetic inset lip."),
+									 [["dividerHeight",dividerHeight],["boxHeight",boxHeight],["magneticLidThickness",magneticLidThickness],
+									  ["bottomThickness",bottomThickness],["magneticLidLocatorDepth",magneticLidLocatorDepth],
+									  ["internalClearance",internalClearance]]));
 		children();
 	}
 }
@@ -795,17 +894,25 @@ module magneticBox(){
 
 module magneticLidBody(decorated=true){
 	assert(!withLidArtwork || (is_num(lidArtworkDepth) && lidArtworkDepth>0),
-		   "Lid artwork depth must be positive and numeric.");
+		   assertion_message("Lid artwork depth must be positive and numeric.",
+							 [["lidArtworkDepth",lidArtworkDepth],["withLidArtwork",withLidArtwork]]));
 	assert(!withLidLogo || (is_num(lidLogoDepth) && lidLogoDepth>0),
-		   "Lid logo depth must be positive and numeric.");
+		   assertion_message("Lid logo depth must be positive and numeric.",[["lidLogoDepth",lidLogoDepth],["withLidLogo",withLidLogo]]));
 	lidTextChecks(boxLength,boxWidth,magneticLidThickness,magneticLidThickness)
 	let(t=magneticLidThickness,
 		engraving=max(withLidArtwork ? lidArtworkDepth : 0,withLidLogo ? lidLogoDepth : 0,
 					  withLidText ? lidTextDepth : 0)){
 		assert(t>=magnetPocketDepth()+engraving+1,
-			   "Magnetic lid engraving must leave at least 1 mm of skin above the magnet pockets; increase magneticLidThickness or reduce engraving depth.");
+			   assertion_message("Magnetic lid engraving must leave at least 1 mm of skin above the magnet pockets; increase magneticLidThickness or reduce engraving depth.",
+								 [["magneticLidThickness",t],["magnetThickness",magnetThickness],["magnetRecess",magnetRecess],
+								  ["withLidArtwork",withLidArtwork],["lidArtworkDepth",lidArtworkDepth],["withLidLogo",withLidLogo],
+								  ["lidLogoDepth",lidLogoDepth],["withLidText",withLidText],["lidTextDepth",lidTextDepth],
+								  ["engraving",engraving],["minimum thickness",magnetPocketDepth()+engraving+1]]));
 		assert(!withNotch || t>=1.5+engraving+1,
-			   "Magnetic finger recess must leave at least 1 mm of skin below the engraving.");
+			   assertion_message("Magnetic finger recess must leave at least 1 mm of skin below the engraving.",
+								 [["magneticLidThickness",t],["withNotch",withNotch],["withLidArtwork",withLidArtwork],["lidArtworkDepth",lidArtworkDepth],
+								  ["withLidLogo",withLidLogo],["lidLogoDepth",lidLogoDepth],["withLidText",withLidText],["lidTextDepth",lidTextDepth],
+								  ["engraving",engraving],["minimum thickness",1.5+engraving+1]]));
 		color(lidColor)
 		difference(){
 			union(){
@@ -840,21 +947,28 @@ module round_box(l=40,w=30,h=30,bt=2,wt=2,r=5,
 	baseInset=wt+stackClearance;
 	floorHeight=bt+baseHeight;
 	assert(wt>0 && l>2*wt && w>2*wt,
-		   "Box length and width must exceed twice the positive wall thickness.");
-	assert(bt>0 && h>bt,"Box height must exceed the positive bottom thickness.");
+		   assertion_message("Box length and width must exceed twice the positive wall thickness.",[["l",l],["w",w],["wt",wt]]));
+	assert(bt>0 && h>bt,assertion_message("Box height must exceed the positive bottom thickness.",[["h",h],["bt",bt]]));
 	assert(r>wt && 2*r<=min(l,w),
-		   "Corner radius must exceed wall thickness and fit within the box.");
+		   assertion_message("Corner radius must exceed wall thickness and fit within the box.",
+							 [["r",r],["wt",wt],["l",l],["w",w],["minimum r (exclusive)",wt],["maximum r",min(l,w)/2]]));
 	if (stackEnabled){
 		assert(stackDepth>0 && floorHeight<h,
-			   "Stacking depth must be positive and leave room above the raised floor.");
+			   assertion_message("Stacking depth must be positive and leave room above the raised floor.",
+								 [["stackDepth",stackDepth],["bt",bt],["floorHeight",floorHeight],["h",h]]));
 		assert(h-stackDepth>=floorHeight+clearance,
-			   "The stacked base must clear the lower box floor by internalClearance.");
-		assert(stackClearance>0,"Stacking clearance must be positive.");
+			   assertion_message("The stacked base must clear the lower box floor by internalClearance.",
+								 [["h",h],["stackDepth",stackDepth],["bt",bt],["floorHeight",floorHeight],["clearance",clearance],
+								  ["base underside",h-stackDepth],["minimum height",floorHeight+clearance]]));
+		assert(stackClearance>0,assertion_message("Stacking clearance must be positive.",[["stackClearance",stackClearance]]));
 		assert(l>2*baseInset && w>2*baseInset && r>baseInset,
-			   "The inset stacking base must fit within the box and its corner radius.");
+			   assertion_message("The inset stacking base must fit within the box and its corner radius.",
+								 [["l",l],["w",w],["r",r],["wt",wt],["stackClearance",stackClearance],["baseInset",baseInset]]));
 		if (ledges!="none")
 			assert(ledgeTopOffset>=stackDepth+clearance,
-				   "Pull top offset must clear the stacked base: stackingDepth + internalClearance.");
+				   assertion_message("Pull top offset must clear the stacked base: stackingDepth + internalClearance.",
+									 [["ledgeTopOffset",ledgeTopOffset],["stackDepth",stackDepth],["clearance",clearance],
+									  ["minimum offset",stackDepth+clearance]]));
 	}
 	union(){
 		difference(){
@@ -888,20 +1002,25 @@ function sizeSum(sizes,count)=
 // Positions are the near faces of walls, measured from the inner X/Y wall.
 function dividerPositions(span,count,thickness,sizes,axis)=
 	assert(is_num(count) && count>=0 && count==floor(count),
-		   str("dividerCount",axis," must be a nonnegative integer."))
-	assert(is_list(sizes),str("compartmentSizes",axis," must be a list."))
+		   assertion_message(str("dividerCount",axis," must be a nonnegative integer."),[[str("dividerCount",axis),count]]))
+	assert(is_list(sizes),assertion_message(str("compartmentSizes",axis," must be a list."),[[str("compartmentSizes",axis),sizes]]))
 	assert(len(sizes)<=count,
-		   str("compartmentSizes",axis," must contain at most ",count," clear sizes."))
+		   assertion_message(str("compartmentSizes",axis," must contain at most ",count," clear sizes."),
+							 [[str("compartmentSizes",axis),sizes],[str("dividerCount",axis),count],["supplied count",len(sizes)]]))
 	assert(len([for (size=sizes) if (!is_num(size) || size<=0) 1])==0,
-		   str("compartmentSizes",axis," must contain positive numbers."))
+		   assertion_message(str("compartmentSizes",axis," must contain positive numbers."),[[str("compartmentSizes",axis),sizes]]))
 	assert(count==0 || (is_num(thickness) && thickness>0),
-		   "dividerThickness must be positive when divisions are enabled.")
+		   assertion_message("dividerThickness must be positive when divisions are enabled.",
+							 [["dividerThickness",thickness],[str("dividerCount",axis),count]]))
 	count==0 ? [] :
 	let(clearSpace=span-count*thickness,
 		suppliedSpace=sizeSum(sizes,len(sizes)))
-	assert(clearSpace>0,str("Divider thickness leaves no compartment space along ",axis,"."))
+	assert(clearSpace>0,assertion_message(str("Divider thickness leaves no compartment space along ",axis,"."),
+										 [["span",span],[str("dividerCount",axis),count],["dividerThickness",thickness],["clearSpace",clearSpace]]))
 	assert(suppliedSpace<clearSpace,
-		   str("compartmentSizes",axis," plus divider thicknesses must leave positive space for remaining compartments."))
+		   assertion_message(str("compartmentSizes",axis," plus divider thicknesses must leave positive space for remaining compartments."),
+							 [[str("compartmentSizes",axis),sizes],[str("dividerCount",axis),count],["dividerThickness",thickness],
+							  ["span",span],["suppliedSpace",suppliedSpace],["clearSpace",clearSpace]]))
 	let(remainingSize=(clearSpace-suppliedSpace)/(count+1-len(sizes)))
 	[for (i=[0:count-1])
 		(i<len(sizes) ? sizeSum(sizes,i+1) :
@@ -913,10 +1032,12 @@ module internalDivisions(l,w,bt,wt,r,floorHeight,topLimit,
 	yPositions=dividerPositions(w-2*wt,countY,thickness,sizesY,"Y");
 	if (len(xPositions)+len(yPositions)>0){
 		assert(is_num(height) && height>0,
-			   "dividerHeight must be positive when divisions are enabled.");
+			   assertion_message("dividerHeight must be positive when divisions are enabled.",
+								 [["dividerHeight",height],["countX",countX],["countY",countY]]));
 		assert(floorHeight+height<=topLimit,
-			   str("dividerHeight must not exceed ",topLimit-floorHeight,
-				   " mm above the interior floor; leave clearance for the lid or stacked base."));
+			   assertion_message(str("dividerHeight must not exceed ",topLimit-floorHeight,
+									 " mm above the interior floor; leave clearance for the lid or stacked base."),
+								 [["dividerHeight",height],["floorHeight",floorHeight],["topLimit",topLimit]]));
 		overlap=min(0.05,bt/4);
 		translate([0,0,floorHeight-overlap])
 		intersection(){
@@ -938,16 +1059,24 @@ module internalPullLedges(l,w,h,bt,wt,r,
 						 placement,width,projection,thickness,topOffset,clearance){
 	assert(placement=="none" || placement=="start" ||
 		   placement=="end" || placement=="both",
-		   "pullLedges must be none, start, end, or both.");
+		   assertion_message("pullLedges must be none, start, end, or both.",[["pullLedges",placement]]));
 	if (placement!="none"){
 		overlap=min(0.05,wt/4);
 		assert(width>0 && projection>0 && thickness>0 && topOffset>0,
-			   "Pull width, projection, thickness, and top offset must be positive.");
-		assert(width<=w-2*r,"Pull width must fit between the rounded end-wall corners.");
+			   assertion_message("Pull width, projection, thickness, and top offset must be positive.",
+								 [["width",width],["projection",projection],["thickness",thickness],["topOffset",topOffset]]));
+		assert(width<=w-2*r,
+			   assertion_message("Pull width must fit between the rounded end-wall corners.",
+								 [["width",width],["w",w],["r",r],["maximum width",w-2*r]]));
 		assert((placement=="both" ? 2 : 1)*projection<l-2*wt,
-			   "Pull projection leaves no space between the ledge and the opposite side.");
+			   assertion_message("Pull projection leaves no space between the ledge and the opposite side.",
+								 [["placement",placement],["projection",projection],["l",l],["wt",wt],
+								  ["total projection",(placement=="both" ? 2 : 1)*projection],["available length",l-2*wt]]));
 		assert(h-topOffset-thickness-projection-overlap>=bt+clearance,
-			   "Pull ledge underside must remain above the floor by internalClearance.");
+			   assertion_message("Pull ledge underside must remain above the floor by internalClearance.",
+								 [["h",h],["topOffset",topOffset],["thickness",thickness],["projection",projection],["overlap",overlap],
+								  ["bt",bt],["clearance",clearance],["ledge underside",h-topOffset-thickness-projection-overlap],
+								  ["minimum height",bt+clearance]]));
 		if (placement=="start" || placement=="both")
 			translate([wt,w/2,h-topOffset])
 			pullLedge(width,projection,thickness,overlap);

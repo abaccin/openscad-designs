@@ -3,6 +3,7 @@
 
 include <../../include/BOSL2/std.scad>
 include <../../include/BOSL2/threading.scad>
+use <../../include/assertions.scad>
 
 /* [Output] */
 part = "all"; // [all, base, dome]
@@ -89,19 +90,30 @@ module validate_connection() {
     assert(positive_numbers([
         collar_diameter, base_height, flange_height, upper_bore_diameter,
         thread_pitch, thread_depth, minimum_wall
-    ]), "Connection dimensions must be positive numbers.")
+    ]), assertion_message("Connection dimensions must be positive numbers.",
+        [["collar_diameter", collar_diameter], ["base_height", base_height], ["flange_height", flange_height],
+         ["upper_bore_diameter", upper_bore_diameter], ["thread_pitch", thread_pitch],
+         ["thread_depth", thread_depth], ["minimum_wall", minimum_wall]]))
     assert(len([for (value = [thread_clearance, thread_axial_clearance, thread_chamfer])
         if (is_num(value) ? value < 0 : true) value]) == 0,
-        "Thread clearances and chamfer must be nonnegative numbers.")
+        assertion_message("Thread clearances and chamfer must be nonnegative numbers.",
+            [["thread_clearance", thread_clearance], ["thread_axial_clearance", thread_axial_clearance], ["thread_chamfer", thread_chamfer]]))
     assert(thread_depth < thread_pitch / 2,
-        "Thread depth must be less than half the pitch to retain flat crests.")
+        assertion_message("Thread depth must be less than half the pitch to retain flat crests.",
+            [["thread_depth", thread_depth], ["thread_pitch", thread_pitch], ["maximum depth (exclusive)", thread_pitch / 2]]))
     assert(collar_height() > 2 * thread_pitch + 2 * thread_chamfer,
-        "Collar must accommodate at least two thread pitches plus chamfers.")
+        assertion_message("Collar must accommodate at least two thread pitches plus chamfers.",
+            [["base_height", base_height], ["flange_height", flange_height], ["thread_pitch", thread_pitch], ["thread_chamfer", thread_chamfer],
+             ["collar_height()", collar_height()], ["minimum height (exclusive)", 2 * thread_pitch + 2 * thread_chamfer]]))
     assert(thread_chamfer <= thread_depth,
-        "Thread chamfer must not exceed the thread depth.")
+        assertion_message("Thread chamfer must not exceed the thread depth.",
+            [["thread_chamfer", thread_chamfer], ["thread_depth", thread_depth]]))
     assert(collar_diameter / 2 - thread_depth - thread_chamfer -
         upper_bore_diameter / 2 >= minimum_wall,
-        "Thread roots and male lead-in must retain the minimum wall around the bore.")
+        assertion_message("Thread roots and male lead-in must retain the minimum wall around the bore.",
+            [["collar_diameter", collar_diameter], ["thread_depth", thread_depth], ["thread_chamfer", thread_chamfer],
+             ["upper_bore_diameter", upper_bore_diameter], ["minimum_wall", minimum_wall],
+             ["remaining wall", collar_diameter / 2 - thread_depth - thread_chamfer - upper_bore_diameter / 2]]))
     children();
 }
 
@@ -130,14 +142,20 @@ module base() {
     assert(positive_numbers([
         flange_diameter, flange_height, collar_diameter, base_height,
         lower_bore_diameter, lower_bore_height, upper_bore_diameter
-    ]), "Base dimensions must be positive numbers.");
+    ]), assertion_message("Base dimensions must be positive numbers.",
+        [["flange_diameter", flange_diameter], ["flange_height", flange_height], ["collar_diameter", collar_diameter],
+         ["base_height", base_height], ["lower_bore_diameter", lower_bore_diameter], ["lower_bore_height", lower_bore_height],
+         ["upper_bore_diameter", upper_bore_diameter]]));
     assert(flange_diameter >= collar_diameter,
-        "Flange diameter must be at least the collar diameter.");
+        assertion_message("Flange diameter must be at least the collar diameter.",
+            [["flange_diameter", flange_diameter], ["collar_diameter", collar_diameter]]));
     assert(collar_diameter > upper_bore_diameter &&
         upper_bore_diameter >= lower_bore_diameter,
-        "Base bores must satisfy lower <= upper < collar diameter.");
+        assertion_message("Base bores must satisfy lower <= upper < collar diameter.",
+            [["lower_bore_diameter", lower_bore_diameter], ["upper_bore_diameter", upper_bore_diameter], ["collar_diameter", collar_diameter]]));
     assert(flange_height < base_height && lower_bore_height < flange_height,
-        "Base heights must satisfy lower bore < flange < overall height.");
+        assertion_message("Base heights must satisfy lower bore < flange < overall height.",
+            [["lower_bore_height", lower_bore_height], ["flange_height", flange_height], ["base_height", base_height]]));
     validate_connection()
     difference() {
         union() {
@@ -164,10 +182,13 @@ module dome() {
     assert(positive_numbers([
         dome_diameter, dome_height, dome_inner_diameter, dome_inner_height,
         dome_inner_offset, top_hole_diameter
-    ]), "Dome dimensions must be positive numbers.")
+    ]), assertion_message("Dome dimensions must be positive numbers.",
+        [["dome_diameter", dome_diameter], ["dome_height", dome_height], ["dome_inner_diameter", dome_inner_diameter],
+         ["dome_inner_height", dome_inner_height], ["dome_inner_offset", dome_inner_offset], ["top_hole_diameter", top_hole_diameter]]))
     assert(top_hole_diameter < dome_inner_diameter &&
         dome_inner_diameter < dome_diameter,
-        "Dome diameters must satisfy hole < interior < outside.")
+        assertion_message("Dome diameters must satisfy hole < interior < outside.",
+            [["top_hole_diameter", top_hole_diameter], ["dome_inner_diameter", dome_inner_diameter], ["dome_diameter", dome_diameter]]))
     validate_connection()
     let(
         hole_radius = top_hole_diameter / 2,
@@ -176,15 +197,30 @@ module dome() {
         inner_top = inner_curve[len(inner_curve) - 1][1]
     )
     assert(inner_top < dome_height,
-        "Dome cavity must terminate below the finished height.")
+        assertion_message("Dome cavity must terminate below the finished height.",
+            [["dome_inner_offset", dome_inner_offset], ["dome_inner_height", dome_inner_height], ["dome_inner_diameter", dome_inner_diameter],
+             ["top_hole_diameter", top_hole_diameter], ["inner_top", inner_top], ["dome_height", dome_height]]))
     assert(socket_depth() >= dome_inner_offset,
-        "Threaded socket must reach the upper cavity's height offset.")
+        assertion_message("Threaded socket must reach the upper cavity's height offset.",
+            [["base_height", base_height], ["flange_height", flange_height], ["thread_axial_clearance", thread_axial_clearance],
+             ["socket_depth()", socket_depth()], ["dome_inner_offset", dome_inner_offset]]))
     assert(socket_depth() + epsilon < inner_top,
-        "Threaded socket and axial clearance must end below the upper cavity.")
+        assertion_message("Threaded socket and axial clearance must end below the upper cavity.",
+            [["base_height", base_height], ["flange_height", flange_height], ["thread_axial_clearance", thread_axial_clearance],
+             ["socket_depth()", socket_depth()], ["epsilon", epsilon], ["dome_inner_offset", dome_inner_offset],
+             ["dome_inner_height", dome_inner_height], ["dome_inner_diameter", dome_inner_diameter],
+             ["top_hole_diameter", top_hole_diameter], ["inner_top", inner_top]]))
     assert(radius_at_height(outer_profile, socket_depth() + epsilon) -
         female_mask_radius() >= minimum_wall &&
         dome_diameter / 2 - female_mask_radius() - thread_chamfer >= minimum_wall,
-        "Dome must retain the minimum wall around the socket and its entrance.")
+        assertion_message("Dome must retain the minimum wall around the socket and its entrance.",
+            [["dome_diameter", dome_diameter], ["dome_height", dome_height], ["top_hole_diameter", top_hole_diameter],
+             ["collar_diameter", collar_diameter], ["base_height", base_height], ["flange_height", flange_height],
+             ["thread_axial_clearance", thread_axial_clearance], ["thread_clearance", thread_clearance], ["thread_chamfer", thread_chamfer],
+             ["radial_segments", radial_segments], ["profile_segments", profile_segments], ["epsilon", epsilon], ["minimum_wall", minimum_wall],
+             ["socket_depth()", socket_depth()], ["female_mask_radius()", female_mask_radius()],
+             ["socket wall", radius_at_height(outer_profile, socket_depth() + epsilon) - female_mask_radius()],
+             ["entrance wall", dome_diameter / 2 - female_mask_radius() - thread_chamfer]]))
     let(inner_profile = concat(
         [[radius_at_height(inner_curve, socket_depth()), socket_depth()]],
         [for (point = inner_curve) if (point[1] > socket_depth()) point],
@@ -195,7 +231,12 @@ module dome() {
             if (point[1] >= socket_depth() && point[1] < dome_height)
                 assert(radius_at_height(outer_profile, point[1]) >
                     radius_at_height(inner_profile, point[1]),
-                    str("Dome wall must remain positive at Z=", point[1], "."));
+                    assertion_message(str("Dome wall must remain positive at Z=", point[1], "."),
+                        [["dome_diameter", dome_diameter], ["dome_height", dome_height], ["dome_inner_diameter", dome_inner_diameter],
+                         ["dome_inner_height", dome_inner_height], ["dome_inner_offset", dome_inner_offset],
+                         ["top_hole_diameter", top_hole_diameter], ["profile_segments", profile_segments],
+                         ["outer radius", radius_at_height(outer_profile, point[1])],
+                         ["inner radius", radius_at_height(inner_profile, point[1])]]));
 
         difference() {
             rotate_extrude(convexity = 10)
@@ -224,15 +265,15 @@ module dome() {
 }
 
 assert(part == "all" || part == "base" || part == "dome",
-    "Unknown part: select all, base, or dome.");
+    assertion_message("Unknown part: select all, base, or dome.", [["part", part]]));
 assert(layout == "print" || layout == "assembled" || layout == "source",
-    "Unknown layout: select print, assembled, or source.");
+    assertion_message("Unknown layout: select print, assembled, or source.", [["layout", layout]]));
 assert(is_num(radial_segments) ?
     radial_segments >= 24 && radial_segments == floor(radial_segments) : false,
-    "Radial segments must be an integer of at least 24.");
+    assertion_message("Radial segments must be an integer of at least 24.", [["radial_segments", radial_segments]]));
 assert(is_num(profile_segments) ?
     profile_segments >= 8 && profile_segments == floor(profile_segments) : false,
-    "Profile segments must be an integer of at least 8.");
+    assertion_message("Profile segments must be an integer of at least 8.", [["profile_segments", profile_segments]]));
 
 if (part == "base") {
     base();
@@ -246,7 +287,7 @@ if (part == "base") {
     translate([0, 0, flange_height]) dome();
 } else {
     assert(is_num(print_gap) ? print_gap > 0 : false,
-        "Print gap must be positive so the parts remain separate.");
+        assertion_message("Print gap must be positive so the parts remain separate.", [["print_gap", print_gap]]));
     dome_x = flange_diameter / 2 + print_gap + dome_diameter / 2;
     base();
     translate([dome_x, 0, 0]) dome();

@@ -1,2 +1,3 @@
 # Generated meshes and slicer projects belong in an exports directory.
 exports/
+__pycache__/

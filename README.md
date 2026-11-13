@@ -16,6 +16,7 @@ and speaker foot use
 | [Blind cord coupler](designs/blind-cord-coupler/README.md) | [blind_cord_coupler.scad](designs/blind-cord-coupler/blind_cord_coupler.scad) | Round 15 mm six-to-one coupler with six radial holes, a central pull hole, and a screw-on knot cover; untested prototype, not a certified breakaway safety connector. |
 | [Chandelier](designs/chandelier/README.md) | [chandelier.scad](designs/chandelier/chandelier.scad) | Flanged base and ellipsoidal dome joined by coarse, clearance-adjustable BOSL2 threads, with print and assembled layouts. |
 | [Boston HS 40 speaker foot](designs/boston-hs40-foot/README.md) | [boston_hs40_foot.scad](designs/boston-hs40-foot/boston_hs40_foot.scad) | Bent-profile replacement speaker foot with chamfered outer edges, a flared outline, three through-holes, and a capsule recess. |
+| [Family ornaments](designs/family-ornaments/README.md) | [export_3mf.py](designs/family-ornaments/scripts/export_3mf.py) | Template-based personalized ornament 3MFs, with red script names, white decorations, and randomized styles. |
 
 Open a design's `.scad` file, adjust its settings, preview with **F5**, then
 render with **F6** before exporting. Keep any referenced assets beside the
@@ -62,6 +63,11 @@ designs\
     README.md
     boston_hs40_foot.scad
     tests\
+  family-ornaments\
+    README.md
+    fonts\
+    scripts\
+    tests\
 tests\
   helpers\
     mesh.mjs
@@ -86,10 +92,14 @@ node scripts\export-3mf.mjs
 
 The default project is now `designs\drawer-box\exports\drawer-box.3mf`.
 These exporters remain specific to the drawer box, not to every design.
+The [family ornament exporter](designs/family-ornaments/README.md) independently
+creates personalized 3MFs from an existing ornament template using Python 3.10+
+and OpenSCAD.
 
 ## Checks
 
 Tests require Node.js 18+ and OpenSCAD 2021.01+; no npm install is needed.
+The separate family ornament checks require Python 3.10+ and no pip packages.
 From the repository root, run an individual design's checks or the full collection:
 
 ```powershell
@@ -100,6 +110,7 @@ node --test designs\blind-cord-coupler\tests\model.test.mjs
 node --test designs\chandelier\tests\model.test.mjs
 node --test designs\boston-hs40-foot\tests\model.test.mjs
 node --test
+python -B -m unittest discover -s designs\family-ornaments\tests -v
 ```
 
 Set `OPENSCAD` to your installation, or omit it if `openscad` is on PATH.
@@ -111,6 +122,8 @@ round-trip checks are skipped when Bambu Studio is unavailable.
 
 Create `designs\<design-name>` with a descriptive `.scad` filename and a
 README covering parameters, units, dependencies, and printing guidance.
+For a template-based workflow, provide a generator script instead of a `.scad`
+source and document the required input template.
 Keep design-specific assets and optional tools there, add regression checks
 under its `tests` directory, and add an entry to the catalog above.
 Do not commit generated exports.
@@ -127,3 +140,6 @@ A license has not yet been specified for the project-authored source or
 artwork. Public availability alone does not grant a license to reuse or
 redistribute them. The bundled BOSL2 files are separately licensed under
 [BSD-2-Clause](include/BOSL2/LICENSE).
+The family ornament exporter bundles the Pacifico font separately under the
+[SIL Open Font License 1.1](designs/family-ornaments/fonts/OFL.txt); its input
+ornament artwork is not included.
